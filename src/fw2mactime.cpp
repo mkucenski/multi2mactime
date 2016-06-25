@@ -1,14 +1,18 @@
-#define APPNAME "fw2mactime"
-#define VERSION "20070319"
+// Copyright 2003 Matthew A. Kucenski
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-//Normal mactime for files
-//"    |FILENAME | |INODE   | |PERMISSIONS| |UID       |GID       |       |SIZE     |ATIME  |MTIME  |CTIME    | | "
-
-//Mactime for event records
-//"REC#|EVENTFILE| |EVENTID | |SOURCE     | |SID       |COMPUTER  |       |TYPE     |       |WRITTEN|GENERATED| | "
-
-//Mactime for firewall records
-//"FWL |MESSAGE  | |MSG-TYPE| |SERVICE    | |SRCIP     |DESTIP    |RAWDATA|SENT/RECV|       |       |GENERATED| | "
+//#define _DEBUG_ 1
 
 #include <string>
 #include <vector>
@@ -19,13 +23,13 @@ using namespace std;
 
 #include "popt.h"
 
-#include "libTimeUtils/timeZoneCalculator.h"
-#include "libTimeUtils/timeUtils.h"
-#include "libdelimText/textFile.h"
-#include "libdelimText/textUtils.h"
-#include "Misc/debugMsgs.h"
-#include "Misc/poptUtils.h"
-#include "Misc/boost_lexical_cast_wrapper.hpp"
+#include "libtimeUtils/src/timeZoneCalculator.h"
+#include "libtimeUtils/src/timeUtils.h"
+#include "libdelimText/src/textFile.h"
+#include "libdelimText/src/textUtils.h"
+#include "misc/debugMsgs.h"
+#include "misc/poptUtils.h"
+#include "misc/boost_lexical_cast_wrapper.hpp"
 
 void processSymantec(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, timeZoneCalculator* pTZCalc) {
 	local_time::local_date_time ldt = pTZCalc->createLocalTime(boost_lexical_cast_wrapper<string>(uiYear) + " " + string(*pstrData, 0, 19), "%Y %b %d %H:%M:%S%F") + posix_time::seconds(uiSkew);
@@ -215,7 +219,7 @@ int main(int argc, const char** argv) {
 				uiSkew = strtol(poptGetOptArg(optCon), NULL, 10);
 				break;
 			case 100:
-				version(APPNAME, VERSION);
+				version(PACKAGE, VERSION);
 				exit(EXIT_SUCCESS);
 				break;
 		}
