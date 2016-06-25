@@ -6,20 +6,45 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXFileReference section */
+		9AAB0A851D1E29340064333E /* Makefile.am */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Makefile.am; sourceTree = "<group>"; };
+		9AAB0A861D1E29340064333E /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		9AAB0A871D1E29340064333E /* bootstrap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = bootstrap; sourceTree = "<group>"; };
+		9AAB0A881D1E29340064333E /* configure.ac */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = configure.ac; sourceTree = "<group>"; };
+		9AAB0A891D1E29340064333E /* Makefile.am */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile.am; path = src/Makefile.am; sourceTree = "<group>"; };
+		9AAB0A8A1D1E29340064333E /* fw2mactime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = fw2mactime.cpp; path = src/fw2mactime.cpp; sourceTree = "<group>"; };
+		9AAB0A8B1D1E29340064333E /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
 /* Begin PBXGroup section */
-		9A7B1AFD1D1E27D300EE0A6F = {
+		9A2F6EFC1D1E290500F4D752 = {
 			isa = PBXGroup;
 			children = (
+				9AAB0A851D1E29340064333E /* Makefile.am */,
+				9AAB0A861D1E29340064333E /* LICENSE */,
+				9AAB0A871D1E29340064333E /* bootstrap */,
+				9AAB0A881D1E29340064333E /* configure.ac */,
+				9AAB0A8C1D1E293B0064333E /* src */,
+				9AAB0A8B1D1E29340064333E /* README.md */,
 			);
+			sourceTree = "<group>";
+		};
+		9AAB0A8C1D1E293B0064333E /* src */ = {
+			isa = PBXGroup;
+			children = (
+				9AAB0A891D1E29340064333E /* Makefile.am */,
+				9AAB0A8A1D1E29340064333E /* fw2mactime.cpp */,
+			);
+			name = src;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXLegacyTarget section */
-		9A7B1B021D1E27D300EE0A6F /* fw2mactime */ = {
+		9A2F6F011D1E290500F4D752 /* fw2mactime */ = {
 			isa = PBXLegacyTarget;
 			buildArgumentsString = "$(ACTION)";
-			buildConfigurationList = 9A7B1B051D1E27D300EE0A6F /* Build configuration list for PBXLegacyTarget "fw2mactime" */;
+			buildConfigurationList = 9A2F6F041D1E290500F4D752 /* Build configuration list for PBXLegacyTarget "fw2mactime" */;
 			buildPhases = (
 			);
 			buildToolPath = /usr/bin/make;
@@ -32,35 +57,35 @@
 /* End PBXLegacyTarget section */
 
 /* Begin PBXProject section */
-		9A7B1AFE1D1E27D300EE0A6F /* Project object */ = {
+		9A2F6EFD1D1E290500F4D752 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = "Matt Kucenski";
 				TargetAttributes = {
-					9A7B1B021D1E27D300EE0A6F = {
+					9A2F6F011D1E290500F4D752 = {
 						CreatedOnToolsVersion = 7.2;
 					};
 				};
 			};
-			buildConfigurationList = 9A7B1B011D1E27D300EE0A6F /* Build configuration list for PBXProject "fw2mactime" */;
+			buildConfigurationList = 9A2F6F001D1E290500F4D752 /* Build configuration list for PBXProject "fw2mactime" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 			);
-			mainGroup = 9A7B1AFD1D1E27D300EE0A6F;
+			mainGroup = 9A2F6EFC1D1E290500F4D752;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				9A7B1B021D1E27D300EE0A6F /* fw2mactime */,
+				9A2F6F011D1E290500F4D752 /* fw2mactime */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin XCBuildConfiguration section */
-		9A7B1B031D1E27D300EE0A6F /* Debug */ = {
+		9A2F6F021D1E290500F4D752 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -100,7 +125,7 @@
 			};
 			name = Debug;
 		};
-		9A7B1B041D1E27D300EE0A6F /* Release */ = {
+		9A2F6F031D1E290500F4D752 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -133,7 +158,7 @@
 			};
 			name = Release;
 		};
-		9A7B1B061D1E27D300EE0A6F /* Debug */ = {
+		9A2F6F051D1E290500F4D752 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEBUGGING_SYMBOLS = YES;
@@ -146,7 +171,7 @@
 			};
 			name = Debug;
 		};
-		9A7B1B071D1E27D300EE0A6F /* Release */ = {
+		9A2F6F061D1E290500F4D752 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -159,24 +184,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		9A7B1B011D1E27D300EE0A6F /* Build configuration list for PBXProject "fw2mactime" */ = {
+		9A2F6F001D1E290500F4D752 /* Build configuration list for PBXProject "fw2mactime" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				9A7B1B031D1E27D300EE0A6F /* Debug */,
-				9A7B1B041D1E27D300EE0A6F /* Release */,
+				9A2F6F021D1E290500F4D752 /* Debug */,
+				9A2F6F031D1E290500F4D752 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9A7B1B051D1E27D300EE0A6F /* Build configuration list for PBXLegacyTarget "fw2mactime" */ = {
+		9A2F6F041D1E290500F4D752 /* Build configuration list for PBXLegacyTarget "fw2mactime" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				9A7B1B061D1E27D300EE0A6F /* Debug */,
-				9A7B1B071D1E27D300EE0A6F /* Release */,
+				9A2F6F051D1E290500F4D752 /* Debug */,
+				9A2F6F061D1E290500F4D752 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 9A7B1AFE1D1E27D300EE0A6F /* Project object */;
+	rootObject = 9A2F6EFD1D1E290500F4D752 /* Project object */;
 }

@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "9A7B1B021D1E27D300EE0A6F"
+               BlueprintIdentifier = "9A2F6F011D1E290500F4D752"
                BuildableName = "fw2mactime"
                BlueprintName = "fw2mactime"
                ReferencedContainer = "container:fw2mactime.xcodeproj">
@@ -45,7 +45,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "9A7B1B021D1E27D300EE0A6F"
+            BlueprintIdentifier = "9A2F6F011D1E290500F4D752"
             BuildableName = "fw2mactime"
             BlueprintName = "fw2mactime"
             ReferencedContainer = "container:fw2mactime.xcodeproj">
@@ -63,7 +63,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "9A7B1B021D1E27D300EE0A6F"
+            BlueprintIdentifier = "9A2F6F011D1E290500F4D752"
             BuildableName = "fw2mactime"
             BlueprintName = "fw2mactime"
             ReferencedContainer = "container:fw2mactime.xcodeproj">
