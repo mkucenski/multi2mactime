@@ -54,6 +54,20 @@
 			passBuildSettingsInEnvironment = 1;
 			productName = fw2mactime;
 		};
+		9A34790A1D295767004CA80C /* README.html */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "-o README.html README.md";
+			buildConfigurationList = 9A34790D1D295767004CA80C /* Build configuration list for PBXLegacyTarget "README.html" */;
+			buildPhases = (
+			);
+			buildToolPath = /opt/local/bin/multimarkdown;
+			buildWorkingDirectory = "";
+			dependencies = (
+			);
+			name = README.html;
+			passBuildSettingsInEnvironment = 1;
+			productName = README.html;
+		};
 /* End PBXLegacyTarget section */
 
 /* Begin PBXProject section */
@@ -64,6 +78,9 @@
 				ORGANIZATIONNAME = "Matt Kucenski";
 				TargetAttributes = {
 					9A2F6F011D1E290500F4D752 = {
+						CreatedOnToolsVersion = 7.2;
+					};
+					9A34790A1D295767004CA80C = {
 						CreatedOnToolsVersion = 7.2;
 					};
 				};
@@ -80,6 +97,7 @@
 			projectRoot = "";
 			targets = (
 				9A2F6F011D1E290500F4D752 /* fw2mactime */,
+				9A34790A1D295767004CA80C /* README.html */,
 			);
 		};
 /* End PBXProject section */
@@ -181,6 +199,29 @@
 			};
 			name = Release;
 		};
+		9A34790B1D295767004CA80C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEBUGGING_SYMBOLS = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		9A34790C1D295767004CA80C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -201,6 +242,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		9A34790D1D295767004CA80C /* Build configuration list for PBXLegacyTarget "README.html" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9A34790B1D295767004CA80C /* Debug */,
+				9A34790C1D295767004CA80C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};
