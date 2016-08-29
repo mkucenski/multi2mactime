@@ -67,24 +67,24 @@ void processSquidW3c(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, timeZ
 
 	string strTime = 	findSubString(*pstrData, 0, ":", ".");
 	
-	string strSrc = 	findSubString(*pstrData, 0, "c_ip=", " ") +
-							"/" + findSubString(*pstrData, 0, "cs_ip=", " ") + ":" +
-							findSubString(*pstrData, 0, "c_port=", " ");
+	string strSrc = 	findSubString(*pstrData, 0, " c_ip=", " ") +
+							"/" + findSubString(*pstrData, 0, " cs_ip=", " ") + ":" +
+							findSubString(*pstrData, 0, " c_port=", " ");
 
-	string strDst =	findSubString(*pstrData, 0, "r_ip=", " ") + ":" +
-							findSubString(*pstrData, 0, "r_port=", " ");
+	string strDst =	findSubString(*pstrData, 0, " r_ip=", " ") + ":" +
+							findSubString(*pstrData, 0, " r_port=", " ");
 
-	string strBytes = findSubString(*pstrData, 0, "sc_bytes=", " ");
+	string strBytes = findSubString(*pstrData, 0, " sc_bytes=", " ");
 
-	string strURL =	findSubString(*pstrData, 0, "cs_method=", " ") + " " +
-							findSubString(*pstrData, 0, "c_uri=", " "); 
+	string strURL =	findSubString(*pstrData, 0, " cs_method=", " ") + " " +
+							findSubString(*pstrData, 0, " c_uri=", " "); 
 
 	strFields[TSK3_MACTIME_NAME]		= strURL;
 	strFields[TSK3_MACTIME_SIZE]		= strBytes;
 	strFields[TSK3_MACTIME_ATIME]		= strTime;
 
 	//Find and passback the referal URL as a second entry for the timeline.
-	string strURL2 = 	"REFERER " + findSubString(*pstrData, 0, "referer=", " ");
+	string strURL2 = 	"REFERER " + findSubString(*pstrData, 0, " referer=", " ");
 
 	strReferer[TSK3_MACTIME_NAME]		= strURL2;
 	strReferer[TSK3_MACTIME_SIZE]		= strBytes;
