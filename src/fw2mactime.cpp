@@ -39,7 +39,7 @@ using namespace std;
 //0  |1        |2     |3    |4       |5       |6    |7  |8     |9   |10     |11   |12      |13      |14      |15
 //MD5|PATH/NAME|DEVICE|INODE|PERM-VAL|PERM-STR|LINKS|UID|GID   |RDEV|SIZE   |ATIME|MTIME   |CTIME   |BLK-SIZE|BLKS
 
-void processSquidW3c(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, timeZoneCalculator* pTZCalc, string* strFields, string* strReferer) {
+void processSquidW3c(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields, string* strReferer) {
 	DEBUG_INFO(PACKAGE << ":processSquidW3c()");
 	// Squid has their own log format, but allow custom log formats; this one
 	//	seems loosely based on the W3C specs: https://www.w3.org/TR/WDlogfile.html
@@ -65,33 +65,45 @@ void processSquidW3c(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, timeZ
 	//		referer="http://www..."	//Referer
 	//		user_agent="Mozilla..."	//Client user agent
 
-	string strTime = 	findSubString(*pstrData, 0, ":", ".");
+	string strTime = 		findSubString(*pstrData, 0, ":", ".");
 	
-	string strSrc = 	findSubString(*pstrData, 0, " c_ip=", " ") +
-							"/" + findSubString(*pstrData, 0, " cs_ip=", " ") + ":" +
-							findSubString(*pstrData, 0, " c_port=", " ");
+	string strSrc = 		findSubString(*pstrData, 0, " c_ip=", " ") +
+								"/" + findSubString(*pstrData, 0, " cs_ip=", " ") + ":" +
+								findSubString(*pstrData, 0, " c_port=", " ");
 
-	string strDst =	findSubString(*pstrData, 0, " r_ip=", " ") + ":" +
-							findSubString(*pstrData, 0, " r_port=", " ");
+	string strDst =		findSubString(*pstrData, 0, " r_ip=", " ") + ":" +
+								findSubString(*pstrData, 0, " r_port=", " ");
 
-	string strBytes = findSubString(*pstrData, 0, " sc_bytes=", " ");
+	string strBytes = 	findSubString(*pstrData, 0, " sc_bytes=", " ");
 
-	string strURL =	findSubString(*pstrData, 0, " cs_method=", " ") + " " +
-							findSubString(*pstrData, 0, " c_uri=", " "); 
+	string strMethod =	findSubString(*pstrData, 0, " cs_method=", " ");
+	string strURI = 		findSubString(*pstrData, 0, " c_uri=", " "); 
 
-	strFields[TSK3_MACTIME_NAME]		= strURL;
+	string strName = 		strMethod + " " + strURI;
+
+	//Find and passback the referal URL as a second entry for the timeline.
+	string strURI2 = 		findSubString(*pstrData, 0, " referer=", " ");
+	string strName2 = 	"REFERER " + strURI2;
+
+	if (bNormalize) {
+		strMethod = stripQualifiers(strMethod, '"');
+		strURI = addQualifiers(stripQualifiers(strURI, '"'), '"');
+		strName = strMethod + " " + strURI;
+
+		strURI2 = addQualifiers(stripQualifiers(strURI2, '"'), '"');
+		strName2 = "REFERER " + strURI2;
+	}
+
+	strFields[TSK3_MACTIME_NAME]		= strName;
 	strFields[TSK3_MACTIME_SIZE]		= strBytes;
 	strFields[TSK3_MACTIME_ATIME]		= strTime;
 
-	//Find and passback the referal URL as a second entry for the timeline.
-	string strURL2 = 	"REFERER " + findSubString(*pstrData, 0, " referer=", " ");
-
-	strReferer[TSK3_MACTIME_NAME]		= strURL2;
+	strReferer[TSK3_MACTIME_NAME]		= strName2;
 	strReferer[TSK3_MACTIME_SIZE]		= strBytes;
 	strReferer[TSK3_MACTIME_ATIME]	= strTime;
 }
 
-void processSymantec(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, timeZoneCalculator* pTZCalc, string* strFields) {
+void processSymantec(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
 	DEBUG_INFO(PACKAGE << ":processSymantec()");
 
 	local_time::local_date_time ldt = pTZCalc->createLocalTime(boost_lexical_cast_wrapper<string>(uiYear) + " " + string(*pstrData, 0, 19), "%Y %b %d %H:%M:%S%F") + posix_time::seconds(uiSkew);
@@ -123,7 +135,7 @@ void processSymantec(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, timeZ
 	strFields[TSK3_MACTIME_CRTIME]	= "";
 }
 
-void processJuniper(string* pstrData, u_int32_t uiSkew, timeZoneCalculator* pTZCalc, string* strFields) {
+void processJuniper(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
 	int32_t timeVal = -1; 
 	string strTime = findSubString(*pstrData, 34, "start_time=\"", "\" ");
 	if (strTime.length()) {
@@ -155,7 +167,7 @@ void processJuniper(string* pstrData, u_int32_t uiSkew, timeZoneCalculator* pTZC
 	cout << "FWL|\"" << strMsg << "\"||" << strMsgType << "||" << strService << "||" << strSrc << "|" << strDst << "|\"" << *pstrData << "\"|" << strBytes << "|||" << (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "") << "||" << endl;
 }
 
-void processPIX(string* pstrData, u_int32_t uiSkew, timeZoneCalculator* pTZCalc, string* strFields) {
+void processPIX(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
 	int32_t timeVal = -1;
 	int32_t uiPIXPos = pstrData->find("%PIX", 16);
 	if (uiPIXPos > 0) {
@@ -251,13 +263,17 @@ int main(int argc, const char** argv) {
 	u_int16_t uiYear = posix_time::second_clock::local_time().date().year();
 	timeZoneCalculator tzcalc;
 	u_int32_t uiSkew = 0;
+	bool bNormalize = false;
+	bool bHTMLDecode = false;
 
 	struct poptOption optionsTable[] = {
 		{"firewall",	'f',	POPT_ARG_STRING,	NULL,	10,	"Format for firewall log(s).", "firewall"},
 		{"year",			'y',	POPT_ARG_INT,		NULL,	20,	"Some firewall logs do not store the year in each entry.  Defaults to the current year.",	"year"},
 		{"timezone", 	'z',	POPT_ARG_STRING,	NULL,	30,	"POSIX timezone string (e.g. 'EST-5EDT,M4.1.0,M10.1.0' or 'GMT-5') indicating which zone the firewall logs are using. Defaults to GMT.", "zone"},
-		{"skew",			 0,		POPT_ARG_INT,		NULL,	40,	"Adjust time values by given seconds.", "seconds"},
-		{"version",		 0,		POPT_ARG_NONE,		NULL,	100,	"Display version.", NULL},
+		{"skew",			's',	POPT_ARG_INT,		NULL,	40,	"Adjust time values by given seconds.", "seconds"},
+		{"normalize",	'n',	POPT_ARG_NONE,		NULL,	50,	"Attempt to clean/normalize input data based on known issues with various types of firewall data. Use w/CAUTION and check stderr for results!"},
+		//{"html-decode",'h',	POPT_ARG_NONE,		NULL, 60, 	"Execute multipass decoding of HTML encoded strings. Provides easier readability of URLs w/in URLs."},
+		{"version",		 0,	POPT_ARG_NONE,		NULL,	100,	"Display version.", NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -288,6 +304,12 @@ int main(int argc, const char** argv) {
 				break;
 			case 40:
 				uiSkew = strtol(poptGetOptArg(optCon), NULL, 10);
+				break;
+			case 50:
+				bNormalize = true;
+				break;
+			case 60:
+				bHTMLDecode = true;
 				break;
 			case 100:
 				version(PACKAGE, VERSION);
@@ -324,12 +346,12 @@ int main(int argc, const char** argv) {
 
 					strFields[TSK3_MACTIME_PERMS] = "squidw3c";
 					strReferer[TSK3_MACTIME_PERMS] = "squidw3c";
-	 				processSquidW3c(&strData, uiYear, uiSkew, &tzcalc, strFields, strReferer);
+	 				processSquidW3c(&strData, uiYear, uiSkew, bNormalize, &tzcalc, strFields, strReferer);
 
 				} else if (strFirewallType == "symantec") {
 
 					strFields[TSK3_MACTIME_PERMS] = "symantec";
-	 				processSymantec(&strData, uiYear, uiSkew, &tzcalc, strFields);
+	 				processSymantec(&strData, uiYear, uiSkew, bNormalize, &tzcalc, strFields);
 
 				} else if (strFirewallType == "ipfw") {
 
@@ -344,12 +366,12 @@ int main(int argc, const char** argv) {
 				} else if (strFirewallType == "pix") {
 
 					strFields[TSK3_MACTIME_PERMS] = "-----pix";
-					processPIX(&strData, uiSkew, &tzcalc, strFields);
+					processPIX(&strData, uiSkew, bNormalize, &tzcalc, strFields);
 
 				} else if (strFirewallType == "juniper") {
 
 					strFields[TSK3_MACTIME_PERMS] = "-juniper";
-					processJuniper(&strData, uiSkew, &tzcalc, strFields);
+					processJuniper(&strData, uiSkew, bNormalize, &tzcalc, strFields);
 
 				} else {
 
