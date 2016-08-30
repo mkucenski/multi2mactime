@@ -78,7 +78,6 @@ void processSquidW3c(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool 
 
 	string strMethod =	findSubString(*pstrData, 0, " cs_method=", " ");
 	string strURI = 		findSubString(*pstrData, 0, " c_uri=", " "); 
-
 	string strName = 		strMethod + " " + strURI;
 
 	//Find and passback the referal URL as a second entry for the timeline.
@@ -87,11 +86,11 @@ void processSquidW3c(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool 
 
 	if (bNormalize) {
 		strMethod = stripQualifiers(strMethod, '"');
-		strURI = addQualifiers(stripQualifiers(strURI, '"'), '"');
-		strName = strMethod + " " + strURI;
+		strURI = stripQualifiers(strURI, '"');
+		strName = addQualifiers(strMethod + " " + strURI, '"');
 
-		strURI2 = addQualifiers(stripQualifiers(strURI2, '"'), '"');
-		strName2 = "REFERER " + strURI2;
+		strURI2 = stripQualifiers(strURI2, '"');
+		strName2 = addQualifiers("REFERER " + strURI2, '"');
 	}
 
 	strFields[TSK3_MACTIME_NAME]		= strName;
