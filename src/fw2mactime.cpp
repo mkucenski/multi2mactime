@@ -27,6 +27,7 @@ using namespace std;
 #include "libtimeUtils/src/timeUtils.h"
 #include "libdelimText/src/textFile.h"
 #include "libdelimText/src/textUtils.h"
+#include "libdelimText/src/delimTextRow.h"
 #include "misc/debugMsgs.h"
 #include "misc/poptUtils.h"
 #include "misc/tsk_mactime.h"
@@ -35,11 +36,47 @@ using namespace std;
 //Sleuthkit TSK3.x body format
 //0  |1        |2    |3     |4       |5       |6   |7    |8    |9    |10
 //MD5|NAME     |INODE|PERMS |UID     |GID     |SIZE|ATIME|MTIME|CTIME|CRTIME
-//Sleuthkit TSK2.x body format
-//0  |1        |2     |3    |4       |5       |6    |7  |8     |9   |10     |11   |12      |13      |14      |15
-//MD5|PATH/NAME|DEVICE|INODE|PERM-VAL|PERM-STR|LINKS|UID|GID   |RDEV|SIZE   |ATIME|MTIME   |CTIME   |BLK-SIZE|BLKS
 
-void processSquidW3c(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields, string* strReferer) {
+#define LOG2MACTIME_HASH	TSK3_MACTIME_MD5
+#define LOG2MACTIME_DETAIL	TSK3_MACTIME_NAME
+#define LOG2MACTIME_TYPE	TSK3_MACTIME_INODE
+#define LOG2MACTIME_LOG		TSK3_MACTIME_PERMS
+#define LOG2MACTIME_FROM	TSK3_MACTIME_UID
+#define LOG2MACTIME_TO		TSK3_MACTIME_GID
+#define LOG2MACTIME_SIZE	TSK3_MACTIME_SIZE
+#define LOG2MACTIME_ATIME	TSK3_MACTIME_ATIME
+#define LOG2MACTIME_MTIME	TSK3_MACTIME_MTIME
+#define LOG2MACTIME_CTIME	TSK3_MACTIME_CTIME
+#define LOG2MACTIME_CRTIME	TSK3_MACTIME_CRTIME
+
+void processFortiGate1K5(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
+	DEBUG_INFO(PACKAGE << ":processFortiGate1K5()");
+	// "itime=1503697041","date=2017-08-25","time=15:37:21","devid=FG1K5D3I16804933","vd=root","type=""utm""","subtype=""webfilter""","action=""passthrough""","","","","","","","","","cat=52","catdesc=""Information Technology""","","","","","","","","","devname=FG1Kcopper","direction=""outgoing""","","dstintf=""port26""","dstintfrole=""undefined""","dstip=54.243.44.67","dstport=80","dtime=1503675441","","eventtype=""ftgd_allow""","","","hostname=""edge.simplereach.com""","","","","level=""notice""","logid=""0317013312""","logtime=1503697041","logver=56","method=""domain""","msg=""URL belongs to an allowed category in policy""","policyid=1","","","profile=""NTC_Web_CTA""","proto=6","rcvdbyte=0","","","referralurl=""http://www.cracked.com/pictofacts-766-28-things-you-completely-misunderstood-as-child-part-2/""","reqtype=""referral""","","sentbyte=1014","","service=""HTTP""","sessionid=18827768","","","srcintf=""port17""","srcintfrole=""undefined""","srcip=172.31.246.13","srcport=63661","","","","","","","url=""/t?pid=4f6a4e1ea782f30c41000002&title=28%20Things%20You%20Completely%20Misunderstood%20As%20A%20Child%2C%20Part%202&url=http://www.cracked.com/pictofacts-766-28-things-you-completely-misunderstood-as-child-part-2/&page_url=http://www.cracked.com/pictofacts-766-2
+	
+	string strTime =		findSubString(*pstrData, 0, "itime=", "\"");
+	string strSrc = 		findSubString(*pstrData, 0, "srcip=", "\"") + ":" + 
+			  					findSubString(*pstrData, 0, "srcport=", "\"");
+	string strDst = 		findSubString(*pstrData, 0, "dstip=", "\"") + ":" + 
+			  					findSubString(*pstrData, 0, "dstport=", "\"");
+	string strURL = 		findSubString(*pstrData, 0, "referralurl=", ",");
+	string strService =	findSubString(*pstrData, 0, "service=", "\"");		  					
+	string strBytes = 	findSubString(*pstrData, 0, "sentbyte=", "\"") + "/" +
+								findSubString(*pstrData, 0, "rcvdbyte=", "\"");
+
+	//Output Values
+	strFields[LOG2MACTIME_DETAIL]		= strURL;
+	strFields[LOG2MACTIME_TYPE]		= strService;
+	strFields[LOG2MACTIME_LOG]			= "fortg1k5";
+	strFields[LOG2MACTIME_FROM]		= strSrc;
+	strFields[LOG2MACTIME_TO]			= strDst;
+	//strFields[LOG2MACTIME_SIZE]		= 
+	strFields[LOG2MACTIME_ATIME]		= strTime;
+	//strFields[LOG2MACTIME_MTIME]	= 
+	//strFields[LOG2MACTIME_CTIME]	= 
+	//strFields[LOG2MACTIME_CRTIME]	= 
+}
+
+void processSquidW3c(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields, string* strSecondary) {
 	DEBUG_INFO(PACKAGE << ":processSquidW3c()");
 	// Squid has their own log format, but allow custom log formats; this one
 	//	seems loosely based on the W3C specs: https://www.w3.org/TR/WDlogfile.html
@@ -93,13 +130,191 @@ void processSquidW3c(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool 
 		strName2 = addQualifiers("REFERER " + strURI2, '"');
 	}
 
-	strFields[TSK3_MACTIME_NAME]		= strName;
-	strFields[TSK3_MACTIME_SIZE]		= strBytes;
-	strFields[TSK3_MACTIME_ATIME]		= strTime;
+	//Output Values
+	strFields[LOG2MACTIME_DETAIL]		= strName;
+	//strFields[LOG2MACTIME_TYPE]		= strService;
+	strFields[LOG2MACTIME_LOG]			= "squidw3c";
+	//strFields[LOG2MACTIME_FROM]		= strSrc;
+	//strFields[LOG2MACTIME_TO]		= strDst;
+	strFields[LOG2MACTIME_SIZE]		= strBytes;
+	strFields[LOG2MACTIME_ATIME]		= strTime;
+	//strFields[LOG2MACTIME_MTIME]	= 
+	//strFields[LOG2MACTIME_CTIME]	= 
+	//strFields[LOG2MACTIME_CRTIME]	= 
+	
+	strSecondary[LOG2MACTIME_DETAIL]	= strName2;
+	//strSecondary[LOG2MACTIME_TYPE]	= strService;
+	strSecondary[LOG2MACTIME_LOG]		= "squidw3c";
+	//strSecondary[LOG2MACTIME_FROM]	= strSrc;
+	//strSecondary[LOG2MACTIME_TO]		= strDst;
+	strSecondary[LOG2MACTIME_SIZE]		= strBytes;
+	strSecondary[LOG2MACTIME_ATIME]		= strTime;
+	//strSecondary[LOG2MACTIME_MTIME]	= 
+	//strSecondary[LOG2MACTIME_CTIME]	= 
+	//strSecondary[LOG2MACTIME_CRTIME]	= 
+}
 
-	strReferer[TSK3_MACTIME_NAME]		= strName2;
-	strReferer[TSK3_MACTIME_SIZE]		= strBytes;
-	strReferer[TSK3_MACTIME_ATIME]	= strTime;
+void processCustomVPN_S1(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
+	DEBUG_INFO(PACKAGE << ":processCustomVPN_S1()");
+
+	//Date,Time,user,src_ip,dest_ip
+	//2/12/17,15:59:31
+	delimTextRow delimText(*pstrData, ',');
+	string strDate = delimText.getField(0);
+	if (strDate != "Date") {
+		string strTime = delimText.getField(1);
+		delimTextRow delimDate(strDate, '/');
+		delimTextRow delimTime(strTime, ':');
+
+		int32_t timeVal = -1; 
+		if (strDate.length() && strTime.length()) {
+			DEBUG_INFO(	strDate << " " << strTime << "\n" <<
+							" month:"	<< boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(0)) <<
+							" day:"		<< boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(1)) <<
+							" year:"		<< boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(2)) <<
+							" hour:"		<< boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(0)) <<
+							" minute:"	<< boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(1)) <<
+							" second:"	<< boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(2)));
+			u_int16_t uiMonth = boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(0));
+			u_int16_t uiDay = boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(1));
+			u_int16_t uiYear = boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(2));
+			u_int16_t uiHour = boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(0));
+			u_int16_t uiMin = boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(1));
+			u_int16_t uiSec = boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(2));
+
+			if (uiYear < 100) {
+				uiYear += 2000;
+			} //if (uiYear < 100) {
+
+			if (	(1 <= uiMonth && uiMonth <= 12) &&
+					(1 <= uiDay && uiDay <= 31) &&
+					(1400 <= uiYear && uiYear <= 10000) &&
+					(0 <= uiHour && uiHour <= 23) &&
+					(0 <= uiMin && uiMin <= 60) &&
+					(0 <= uiSec && uiSec <= 60)) {
+				local_time::local_date_time ldt = pTZCalc->createLocalTime(uiMonth, uiDay, uiYear, uiHour, uiMin, uiSec) + posix_time::seconds(uiSkew);
+				timeVal = getUnix32FromLocalTime(ldt);
+			} else {
+					  DEBUG_INFO("whoops");
+				//ERROR
+			} //if (	(1 <= uiMonth && uiMonth <= 12) &&
+		}
+	
+		//Output Values
+		strFields[LOG2MACTIME_DETAIL]		= delimText.getField(2);	//username
+		//strFields[LOG2MACTIME_TYPE]		= strService;
+		strFields[LOG2MACTIME_LOG]			= "-----vpn";
+		strFields[LOG2MACTIME_FROM]		= delimText.getField(3);	//src_ip
+		strFields[LOG2MACTIME_TO]			= delimText.getField(4);	//dst_ip
+		//strFields[LOG2MACTIME_SIZE]		= 
+		strFields[LOG2MACTIME_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
+		//strFields[LOG2MACTIME_MTIME]	= 
+		//strFields[LOG2MACTIME_CTIME]	= 
+		//strFields[LOG2MACTIME_CRTIME]	= 
+
+	} //if (strDate != "Date") {
+}
+
+void processCustomFSEM(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
+	DEBUG_INFO(PACKAGE << ":processCustomFSEM()");
+
+	//Date (UTC)				IP							ed2k Hash									Filename
+	// 8/1/2016 8:11:17 PM	107.77.172.33 :8004	54972296B9DD3CFE194FD3328827DD42	
+	delimTextRow delimText(*pstrData, '\t');
+	string strDateTime = delimText.getField(0);
+	delimTextRow delimDateTime(strDateTime, ' ');
+	delimTextRow delimDate(delimDateTime.getField(0), '/');
+	delimTextRow delimTime(delimDateTime.getField(1), ':');
+
+	int32_t timeVal = -1; 
+	if (strDateTime.length()) {
+		u_int16_t uiHour = boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(0));
+		u_int16_t uiHourDbg = uiHour;
+		if (delimDateTime.getField(2) == "PM") {
+			if (uiHour != 12) {
+				uiHour += 12;
+			}
+		} else {
+			if (uiHour == 12) {
+				uiHour = 0;
+			}
+		}
+		local_time::local_date_time ldt = pTZCalc->createLocalTime(	boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(0)),	//month
+							 															boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(1)),	//day
+																						boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(2)),	//year
+																						uiHour, 																			//hour
+																						boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(1)),	//minute
+																						boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(2)))	//second
+																						+ posix_time::seconds(uiSkew);
+		timeVal = getUnix32FromLocalTime(ldt);
+	}
+
+	string strIPPort = delimText.getField(1);
+	string strIP = findSubString(strIPPort, 0, "", " ");
+	string strPort = findSubString(strIPPort, 0, " :", "");
+
+	//Output Values
+	strFields[LOG2MACTIME_DETAIL]		= delimText.getField(2);
+	//strFields[LOG2MACTIME_TYPE]		= strService;
+	strFields[LOG2MACTIME_LOG]			= "---emule";
+	strFields[LOG2MACTIME_FROM]		= strIP;
+	//strFields[LOG2MACTIME_TO]		= strDst;
+	//strFields[LOG2MACTIME_SIZE]		= 
+	strFields[LOG2MACTIME_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
+	//strFields[LOG2MACTIME_MTIME]	= 
+	//strFields[LOG2MACTIME_CTIME]	= 
+	//strFields[LOG2MACTIME_CRTIME]	= 
+}
+
+void processCustomFSBT(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
+	DEBUG_INFO(PACKAGE << ":processCustomFSBT()");
+
+	//Date (UTC)	IP		Infohash		Severity		No. Of FOI (tab-separated, copy/paste from website)
+	//"8/1/2017  8:06:25 AM"
+	delimTextRow delimText(*pstrData, '\t');
+	string strDateTime = delimText.getField(0);
+	delimTextRow delimDateTime(strDateTime, ' ');
+	delimTextRow delimDate(delimDateTime.getField(0), '/');
+	delimTextRow delimTime(delimDateTime.getField(1), ':');
+
+	int32_t timeVal = -1; 
+	if (strDateTime.length()) {
+		u_int16_t uiHour = boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(0));
+		u_int16_t uiHourDbg = uiHour;
+		if (delimDateTime.getField(2) == "PM") {
+			if (uiHour != 12) {
+				uiHour += 12;
+			}
+		} else {
+			if (uiHour == 12) {
+				uiHour = 0;
+			}
+		}
+		local_time::local_date_time ldt = pTZCalc->createLocalTime(	boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(0)),	//month
+							 															boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(1)),	//day
+																						boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(2)),	//year
+																						uiHour, 																			//hour
+																						boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(1)),	//minute
+																						boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(2)))	//second
+																						+ posix_time::seconds(uiSkew);
+		timeVal = getUnix32FromLocalTime(ldt);
+	}
+
+	string strIPPort = delimText.getField(1);
+	string strIP = findSubString(strIPPort, 0, "", " ");
+	string strPort = findSubString(strIPPort, 0, " :", "");
+
+	//Output Values
+	strFields[LOG2MACTIME_DETAIL]		= delimText.getField(2);
+	//strFields[LOG2MACTIME_TYPE]		= strService;
+	strFields[LOG2MACTIME_LOG]			= "bittorre";
+	strFields[LOG2MACTIME_FROM]		= strIP;
+	//strFields[LOG2MACTIME_TO]		= strDst;
+	strFields[LOG2MACTIME_SIZE]		= delimText.getField(4);
+	strFields[LOG2MACTIME_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
+	//strFields[LOG2MACTIME_MTIME]	= 
+	//strFields[LOG2MACTIME_CTIME]	= 
+	//strFields[LOG2MACTIME_CRTIME]	= 
 }
 
 void processSymantec(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
@@ -122,16 +337,17 @@ void processSymantec(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool 
 	string strSrc = findSubString(*pstrData, 23, "src=", "/");
 	string strDst = findSubString(*pstrData, 23, "dst=", "/");
 
-	//strFields[TSK3_MACTIME_MD5] 		= strService; //MD5 not output in default version of datatime/mactime (TODO where else can this data go?)
-	strFields[TSK3_MACTIME_NAME]		= strMsg;
-	strFields[TSK3_MACTIME_INODE]		= strMsgType;
-	strFields[TSK3_MACTIME_UID]		= strSrc;
-	strFields[TSK3_MACTIME_GID]		= strDst;
-	strFields[TSK3_MACTIME_SIZE]		= strBytes;
-	strFields[TSK3_MACTIME_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
-	strFields[TSK3_MACTIME_MTIME]		= "";
-	strFields[TSK3_MACTIME_CTIME]		= "";
-	strFields[TSK3_MACTIME_CRTIME]	= "";
+	//Output Values
+	strFields[LOG2MACTIME_DETAIL]		= strMsg;
+	strFields[LOG2MACTIME_TYPE]		= strMsgType;
+	strFields[LOG2MACTIME_LOG]			= "symantec";
+	strFields[LOG2MACTIME_FROM]		= strSrc;
+	strFields[LOG2MACTIME_TO]			= strDst;
+	strFields[LOG2MACTIME_SIZE]		= strBytes;
+	strFields[LOG2MACTIME_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
+	//strFields[LOG2MACTIME_MTIME]	= 
+	//strFields[LOG2MACTIME_CTIME]	= 
+	//strFields[LOG2MACTIME_CRTIME]	= 
 }
 
 void processJuniper(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
@@ -163,7 +379,17 @@ void processJuniper(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZon
 			strBytes = strSent + "/" + strRcvd;
 	}
 
-	cout << "FWL|\"" << strMsg << "\"||" << strMsgType << "||" << strService << "||" << strSrc << "|" << strDst << "|\"" << *pstrData << "\"|" << strBytes << "|||" << (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "") << "||" << endl;
+	//Output Values
+	strFields[LOG2MACTIME_DETAIL]		= strMsg;
+	strFields[LOG2MACTIME_TYPE]		= strMsgType + ":" + strService;
+	strFields[LOG2MACTIME_LOG]			= "-juniper";
+	strFields[LOG2MACTIME_FROM]		= strSrc;
+	strFields[LOG2MACTIME_TO]			= strDst;
+	strFields[LOG2MACTIME_SIZE]		= strBytes;
+	strFields[LOG2MACTIME_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
+	//strFields[LOG2MACTIME_MTIME]	= 
+	//strFields[LOG2MACTIME_CTIME]	= 
+	//strFields[LOG2MACTIME_CRTIME]	= 
 }
 
 void processPIX(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
@@ -250,7 +476,17 @@ void processPIX(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCal
 		}
 	}
 		
-	cout << "FWL|\"" << strMsg << "\"||" << strMsgType << "||" << strService << "||" << strSrc << "|" << strDst << "|\"" << *pstrData << "\"|" << strBytes << "|||" << (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "") << "||" << endl;
+	//Output Values
+	strFields[LOG2MACTIME_DETAIL]		= strMsg;
+	strFields[LOG2MACTIME_TYPE]		= strMsgType + ":" + strService;
+	strFields[LOG2MACTIME_LOG]			= "-----pix";
+	strFields[LOG2MACTIME_FROM]		= strSrc;
+	strFields[LOG2MACTIME_TO]			= strDst;
+	strFields[LOG2MACTIME_SIZE]		= strBytes;
+	strFields[LOG2MACTIME_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
+	//strFields[LOG2MACTIME_MTIME]	= 
+	//strFields[LOG2MACTIME_CTIME]	= 
+	//strFields[LOG2MACTIME_CRTIME]	= 
 }
 
 int main(int argc, const char** argv) {
@@ -258,7 +494,9 @@ int main(int argc, const char** argv) {
 
 	textFile txtFileObj;
 	vector<string> filenameVector;
-	string strFirewallType = "squidw3c";
+	string strFirewallType = "";
+	string strCustom1 = "";
+	string strCustom2 = "";
 	u_int16_t uiYear = posix_time::second_clock::local_time().date().year();
 	timeZoneCalculator tzcalc;
 	u_int32_t uiSkew = 0;
@@ -272,6 +510,8 @@ int main(int argc, const char** argv) {
 		{"skew",			's',	POPT_ARG_INT,		NULL,	40,	"Adjust time values by given seconds.", "seconds"},
 		{"normalize",	'n',	POPT_ARG_NONE,		NULL,	50,	"Attempt to clean/normalize input data based on known issues with various types of firewall data. Use w/CAUTION and check stderr for results!"},
 		//{"html-decode",'h',	POPT_ARG_NONE,		NULL, 60, 	"Execute multipass decoding of HTML encoded strings. Provides easier readability of URLs w/in URLs."},
+		{"custom1",		 0,	POPT_ARG_STRING,	NULL,	70,	"Custom value applicable to certain types of data.", "custom1"},
+		{"custom2",		 0,	POPT_ARG_STRING,	NULL,	80,	"Custom value applicable to certain types of data.", "custom2"},
 		{"version",		 0,	POPT_ARG_NONE,		NULL,	100,	"Display version.", NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
@@ -310,6 +550,12 @@ int main(int argc, const char** argv) {
 			case 60:
 				bHTMLDecode = true;
 				break;
+			case 70:
+				strCustom1 = poptGetOptArg(optCon);
+				break;
+			case 80:
+				strCustom2 = poptGetOptArg(optCon);
+				break;
 			case 100:
 				version(PACKAGE, VERSION);
 				exit(EXIT_SUCCESS);
@@ -338,74 +584,63 @@ int main(int argc, const char** argv) {
 
 			string strData;
 			string strFields[11];
-			string strReferer[11];
+			string strSecondary[11];
 
 			while (txtFileObj.getNextRow(&strData)) {
 				if (strFirewallType == "squidw3c") {
-
-					strFields[TSK3_MACTIME_PERMS] = "squidw3c";
-					strReferer[TSK3_MACTIME_PERMS] = "squidw3c";
-	 				processSquidW3c(&strData, uiYear, uiSkew, bNormalize, &tzcalc, strFields, strReferer);
-
+	 				processSquidW3c(&strData, uiYear, uiSkew, bNormalize, &tzcalc, strFields, strSecondary);
 				} else if (strFirewallType == "symantec") {
-
-					strFields[TSK3_MACTIME_PERMS] = "symantec";
 	 				processSymantec(&strData, uiYear, uiSkew, bNormalize, &tzcalc, strFields);
-
 				} else if (strFirewallType == "ipfw") {
-
-					strFields[TSK3_MACTIME_PERMS] = "----ipfw";
-					cout << "Not Yet Implemented" << endl;
-
+					strFields[LOG2MACTIME_LOG] = "----ipfw";
+					strFields[LOG2MACTIME_DETAIL] = "Not Yet Implemented";
 				} else if (strFirewallType == "pf") {
-
-					strFields[TSK3_MACTIME_PERMS] = "------pf";
-					cout << "Not Yet Implemented" << endl;
-
+					strFields[LOG2MACTIME_LOG] = "------pf";
+					strFields[LOG2MACTIME_DETAIL] = "Not Yet Implemented";
 				} else if (strFirewallType == "pix") {
-
-					strFields[TSK3_MACTIME_PERMS] = "-----pix";
 					processPIX(&strData, uiSkew, bNormalize, &tzcalc, strFields);
-
 				} else if (strFirewallType == "juniper") {
-
-					strFields[TSK3_MACTIME_PERMS] = "-juniper";
 					processJuniper(&strData, uiSkew, bNormalize, &tzcalc, strFields);
-
+				} else if (strFirewallType == "custfsbt") {
+					processCustomFSBT(&strData, uiSkew, bNormalize, &tzcalc, strFields);
+				} else if (strFirewallType == "custfsem") {
+					processCustomFSEM(&strData, uiSkew, bNormalize, &tzcalc, strFields);
+				} else if (strFirewallType == "cusvpns1") {
+					processCustomVPN_S1(&strData, uiSkew, bNormalize, &tzcalc, strFields);
+				} else if (strFirewallType == "fortg1k5") {
+					processFortiGate1K5(&strData, uiSkew, bNormalize, &tzcalc, strFields);
 				} else {
-
-					strFields[TSK3_MACTIME_PERMS] = "-unknown";
-					cout << "Unknown Firewall Type" << endl;
-
+					strFields[LOG2MACTIME_LOG] = "-unknown";
+					strFields[LOG2MACTIME_DETAIL] = "Unknown Firewall Type";
 				}
 
-				//TSK 3.0+: MD5|name|inode|mode_as_string|UID|GID|size|atime|mtime|ctime|crtime
-				cout 	<< strFields[TSK3_MACTIME_MD5] << "|"					//0  MD5
-						<< strFields[TSK3_MACTIME_NAME] << "|"					//1  name
-						<< strFields[TSK3_MACTIME_INODE] << "|"				//2  inode
-						<< "fwl-" << strFields[TSK3_MACTIME_PERMS] << "|"	//3  mode_as_string;
-						<< strFields[TSK3_MACTIME_UID] << "|"					//4  UID
-						<< strFields[TSK3_MACTIME_GID] << "|"					//5  GID
-						<< strFields[TSK3_MACTIME_SIZE] << "|" 				//6  size
-						<< strFields[TSK3_MACTIME_ATIME] << "|"				//7  atime
-						<< strFields[TSK3_MACTIME_MTIME] << "|"				//8  mtime
-						<< strFields[TSK3_MACTIME_CTIME] << "|"				//9  ctime
-						<< strFields[TSK3_MACTIME_CRTIME]						//10 crtime
-						<< "\n";
-				if (strReferer[TSK3_MACTIME_NAME] != "") {
-					cout 	<< strReferer[TSK3_MACTIME_MD5] << "|"					//0  MD5
-							<< strReferer[TSK3_MACTIME_NAME] << "|"				//1  name
-							<< strReferer[TSK3_MACTIME_INODE] << "|"				//2  inode
-							<< "fwl-" << strFields[TSK3_MACTIME_PERMS] << "|"	//3  mode_as_string;
-							<< strReferer[TSK3_MACTIME_UID] << "|"					//4  UID
-							<< strReferer[TSK3_MACTIME_GID] << "|"					//5  GID
-							<< strReferer[TSK3_MACTIME_SIZE] << "|" 				//6  size
-							<< strReferer[TSK3_MACTIME_ATIME] << "|"				//7  atime
-							<< strReferer[TSK3_MACTIME_MTIME] << "|"				//8  mtime
-							<< strReferer[TSK3_MACTIME_CTIME] << "|"				//9  ctime
-							<< strReferer[TSK3_MACTIME_CRTIME]						//10 crtime
-							<< "\n";
-				}
+				// Output final mactime format
+				cout 					<< strFields[LOG2MACTIME_HASH]	<< "|"
+										<< strFields[LOG2MACTIME_DETAIL]	<< "|"
+										<< strFields[LOG2MACTIME_TYPE]	<< "|"
+						<< "log-"	<< strFields[LOG2MACTIME_LOG]		<< "|"
+										<< strFields[LOG2MACTIME_FROM]	<< "|"
+										<< strFields[LOG2MACTIME_TO]		<< "|"
+										<< strFields[LOG2MACTIME_SIZE]	<< "|"
+										<< strFields[LOG2MACTIME_ATIME]	<< "|"
+										<< strFields[LOG2MACTIME_MTIME]	<< "|"
+										<< strFields[LOG2MACTIME_CTIME]	<< "|"
+										<< strFields[LOG2MACTIME_CRTIME]	<< "\n";
+
+				// If secondary records created, output them in mactime format also
+				if (strSecondary[LOG2MACTIME_DETAIL] != "") {
+					cout 					<< strSecondary[LOG2MACTIME_HASH]		<< "|"
+											<< strSecondary[LOG2MACTIME_DETAIL]	<< "|"
+											<< strSecondary[LOG2MACTIME_TYPE]		<< "|"
+							<< "log-"	<< strSecondary[LOG2MACTIME_LOG]		<< "|"
+											<< strSecondary[LOG2MACTIME_FROM]		<< "|"
+											<< strSecondary[LOG2MACTIME_TO]			<< "|"
+											<< strSecondary[LOG2MACTIME_SIZE]		<< "|"
+											<< strSecondary[LOG2MACTIME_ATIME]		<< "|"
+											<< strSecondary[LOG2MACTIME_MTIME]		<< "|"
+											<< strSecondary[LOG2MACTIME_CTIME]		<< "|"
+											<< strSecondary[LOG2MACTIME_CRTIME]	<< "\n";
+				} //if (strSecondary[LOG2MACTIME_DETAIL] != "") {
 			}
 		} else {
 		}
@@ -413,3 +648,4 @@ int main(int argc, const char** argv) {
 
 	exit(rv);	
 }	//int main(int argc, const char** argv) {
+
