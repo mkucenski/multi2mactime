@@ -49,6 +49,99 @@ using namespace std;
 #define LOG2MACTIME_CTIME	TSK3_MACTIME_CTIME
 #define LOG2MACTIME_CRTIME	TSK3_MACTIME_CRTIME
 
+void processHirsch(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
+	DEBUG_INFO(PACKAGE << ":processHirsch()");
+	//"	   Host Date/Time BETWEEN '2017-08-23 00:00:00' AND '2017-08-25 23:59:59'   ","<SITE>","All Events Log By Date","Print Time:","8/30/2017","12:07:07PM","Printed by:","<USER>","Sequence ID","Host Date/Time","Controller Date/Time","Description","Event ID","Address",285061,"8/25/2017  11:59:59PM","8/26/2017  12:00:00AM","Updating temporary users",8010,"\\XNET.001.0004.001.01","Page -1 of 1"
+	//"	   Host Date/Time BETWEEN '2017-08-23 00:00:00' AND '2017-08-25 23:59:59'   "
+	
+	//"<SITE>"							0
+	//"All Events Log By Date"		1
+	//"Print Time:"					2
+	//"8/30/2017"						3
+	//"12:07:07PM"						4
+	//"Printed by:"					5
+	//"<USER>"							6
+	//"Sequence ID"					7
+	//"Host Date/Time"				8
+	//"Controller Date/Time"		9
+	//"Description"					10
+	//"Event ID"						11
+	//"Address"							12
+	//285061								13
+	//"8/25/2017  11:59:59PM"		14
+	//"8/26/2017  12:00:00AM"		15
+	//"Updating temporary users"	16
+	//8010								17
+	//"\\XNET.001.0004.001.01"		18
+	//"Page -1 of 1"					19
+	
+	delimTextRow delimText(*pstrData, ',');
+	string strDateTime = delimText.getField(14);
+	string strDate = findSubString(strDateTime, 0, "", " ");
+	string strTime = findSubString(findSubString(findSubString(strDateTime, 0, " ", ""), 0, " ", ""), 0, " ", ""); //time may have up to three leading spaces; dirty way to get rid of them...
+
+	delimTextRow delimDate(strDate, '/');
+	delimTextRow delimTime(strTime, ':');
+
+		int32_t timeVal = -1; 
+		if (strDate.length() && strTime.length()) {
+			DEBUG_INFO(	strDate << " " << strTime << "\n" <<
+							" month:"	<< boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(0)) <<
+							" day:"		<< boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(1)) <<
+							" year:"		<< boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(2)) <<
+							" hour:"		<< boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(0)) <<
+							" minute:"	<< boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(1)) <<
+							" second:"	<< boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(2)));
+			u_int16_t uiMonth = boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(0));
+			u_int16_t uiDay = boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(1));
+			u_int16_t uiYear = boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(2));
+			u_int16_t uiHour = boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(0));
+			u_int16_t uiMin = boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(1));
+			u_int16_t uiSec = boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(2));
+
+			if (uiYear < 100) {
+				uiYear += 2000;
+			} //if (uiYear < 100) {
+
+			if (	(1 <= uiMonth && uiMonth <= 12) &&
+					(1 <= uiDay && uiDay <= 31) &&
+					(1400 <= uiYear && uiYear <= 10000) &&
+					(0 <= uiHour && uiHour <= 23) &&
+					(0 <= uiMin && uiMin <= 60) &&
+					(0 <= uiSec && uiSec <= 60)) {
+				local_time::local_date_time ldt = pTZCalc->createLocalTime(uiMonth, uiDay, uiYear, uiHour, uiMin, uiSec) + posix_time::seconds(uiSkew);
+				timeVal = getUnix32FromLocalTime(ldt);
+			} else {
+					  DEBUG_INFO("whoops");
+				//ERROR
+			} //if (	(1 <= uiMonth && uiMonth <= 12) &&
+		}
+	
+	/* This was never actually completed...
+	string strTime =		findSubString(*pstrData, 0, "itime=", "\"");
+	string strSrc = 		findSubString(*pstrData, 0, "srcip=", "\"") + ":" + 
+			  					findSubString(*pstrData, 0, "srcport=", "\"");
+	string strDst = 		findSubString(*pstrData, 0, "dstip=", "\"") + ":" + 
+			  					findSubString(*pstrData, 0, "dstport=", "\"");
+	string strURL = 		findSubString(*pstrData, 0, "referralurl=", ",");
+	string strService =	findSubString(*pstrData, 0, "service=", "\"");		  					
+	string strBytes = 	findSubString(*pstrData, 0, "sentbyte=", "\"") + "/" +
+								findSubString(*pstrData, 0, "rcvdbyte=", "\"");
+
+	//Output Values
+	strFields[LOG2MACTIME_DETAIL]		= strURL;
+	strFields[LOG2MACTIME_TYPE]		= strService;
+	strFields[LOG2MACTIME_LOG]			= "fortg1k5";
+	strFields[LOG2MACTIME_FROM]		= strSrc;
+	strFields[LOG2MACTIME_TO]			= strDst;
+	//strFields[LOG2MACTIME_SIZE]		= 
+	strFields[LOG2MACTIME_ATIME]		= strTime;
+	//strFields[LOG2MACTIME_MTIME]	= 
+	//strFields[LOG2MACTIME_CTIME]	= 
+	//strFields[LOG2MACTIME_CRTIME]	= 
+	*/
+}
+
 void processFortiGate1K5(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
 	DEBUG_INFO(PACKAGE << ":processFortiGate1K5()");
 	// "itime=1503697041","date=2017-08-25","time=15:37:21","devid=FG1K5D3I16804933","vd=root","type=""utm""","subtype=""webfilter""","action=""passthrough""","","","","","","","","","cat=52","catdesc=""Information Technology""","","","","","","","","","devname=FG1Kcopper","direction=""outgoing""","","dstintf=""port26""","dstintfrole=""undefined""","dstip=54.243.44.67","dstport=80","dtime=1503675441","","eventtype=""ftgd_allow""","","","hostname=""edge.simplereach.com""","","","","level=""notice""","logid=""0317013312""","logtime=1503697041","logver=56","method=""domain""","msg=""URL belongs to an allowed category in policy""","policyid=1","","","profile=""NTC_Web_CTA""","proto=6","rcvdbyte=0","","","referralurl=""http://www.cracked.com/pictofacts-766-28-things-you-completely-misunderstood-as-child-part-2/""","reqtype=""referral""","","sentbyte=1014","","service=""HTTP""","sessionid=18827768","","","srcintf=""port17""","srcintfrole=""undefined""","srcip=172.31.246.13","srcport=63661","","","","","","","url=""/t?pid=4f6a4e1ea782f30c41000002&title=28%20Things%20You%20Completely%20Misunderstood%20As%20A%20Child%2C%20Part%202&url=http://www.cracked.com/pictofacts-766-28-things-you-completely-misunderstood-as-child-part-2/&page_url=http://www.cracked.com/pictofacts-766-2
@@ -77,7 +170,7 @@ void processFortiGate1K5(string* pstrData, u_int32_t uiSkew, bool bNormalize, ti
 }
 
 void processSquidW3c(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields, string* strSecondary) {
-	DEBUG_INFO(PACKAGE << ":processSquidW3c()");
+	DEBUG_INFO(PACKAGE << ":processSquidW3c()" << "[" << *pstrData << "]");
 	// Squid has their own log format, but allow custom log formats; this one
 	//	seems loosely based on the W3C specs: https://www.w3.org/TR/WDlogfile.html
 	// With the exception of [logfile:] and [date/time;], the rest of the fields
@@ -102,7 +195,10 @@ void processSquidW3c(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool 
 	//		referer="http://www..."	//Referer
 	//		user_agent="Mozilla..."	//Client user agent
 
-	string strTime = 		findSubString(*pstrData, 0, ":", ".");
+	//TODO - This is a problem... some of these logs files come with the log file included in the data; others do not. Need a more robust way to handle both options.
+	// string strTime = 		findSubString(*pstrData, 0, "", ".");
+	string strTime = 		findSubString(*pstrData, 0, "", ".");
+	DEBUG_INFO(strTime);
 	
 	string strSrc = 		findSubString(*pstrData, 0, " c_ip=", " ") +
 								"/" + findSubString(*pstrData, 0, " cs_ip=", " ") + ":" +
@@ -117,17 +213,10 @@ void processSquidW3c(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool 
 	string strURI = 		findSubString(*pstrData, 0, " c_uri=", " "); 
 	string strName = 		strMethod + " " + strURI;
 
-	//Find and passback the referal URL as a second entry for the timeline.
-	string strURI2 = 		findSubString(*pstrData, 0, " referer=", " ");
-	string strName2 = 	"REFERER " + strURI2;
-
 	if (bNormalize) {
 		strMethod = stripQualifiers(strMethod, '"');
 		strURI = stripQualifiers(strURI, '"');
 		strName = addQualifiers(strMethod + " " + strURI, '"');
-
-		strURI2 = stripQualifiers(strURI2, '"');
-		strName2 = addQualifiers("REFERER " + strURI2, '"');
 	}
 
 	//Output Values
@@ -142,16 +231,29 @@ void processSquidW3c(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool 
 	//strFields[LOG2MACTIME_CTIME]	= 
 	//strFields[LOG2MACTIME_CRTIME]	= 
 	
-	strSecondary[LOG2MACTIME_DETAIL]	= strName2;
-	//strSecondary[LOG2MACTIME_TYPE]	= strService;
-	strSecondary[LOG2MACTIME_LOG]		= "squidw3c";
-	//strSecondary[LOG2MACTIME_FROM]	= strSrc;
-	//strSecondary[LOG2MACTIME_TO]		= strDst;
-	strSecondary[LOG2MACTIME_SIZE]		= strBytes;
-	strSecondary[LOG2MACTIME_ATIME]		= strTime;
-	//strSecondary[LOG2MACTIME_MTIME]	= 
-	//strSecondary[LOG2MACTIME_CTIME]	= 
-	//strSecondary[LOG2MACTIME_CRTIME]	= 
+	//Find and passback the referal URL as a second entry for the timeline.
+	string strURI2 = 		findSubString(*pstrData, 0, " referer=", " ");
+	// Check to make sure referal URL is valid/useful before adding it to the timeline.
+	if (strURI2 != "\"-\"") {
+		string strName2 = 	"REFERER " + strURI2;
+
+		if (bNormalize) {
+			strURI2 = stripQualifiers(strURI2, '"');
+			strName2 = addQualifiers("REFERER " + strURI2, '"');
+		}
+
+		//Output Values
+		strSecondary[LOG2MACTIME_DETAIL]	= strName2;
+		//strSecondary[LOG2MACTIME_TYPE]	= strService;
+		strSecondary[LOG2MACTIME_LOG]		= "squidw3c";
+		//strSecondary[LOG2MACTIME_FROM]	= strSrc;
+		//strSecondary[LOG2MACTIME_TO]		= strDst;
+		strSecondary[LOG2MACTIME_SIZE]		= strBytes;
+		strSecondary[LOG2MACTIME_ATIME]		= strTime;
+		//strSecondary[LOG2MACTIME_MTIME]	= 
+		//strSecondary[LOG2MACTIME_CTIME]	= 
+		//strSecondary[LOG2MACTIME_CRTIME]	= 
+	}
 }
 
 void processCustomVPN_S1(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
@@ -609,6 +711,8 @@ int main(int argc, const char** argv) {
 					processCustomVPN_S1(&strData, uiSkew, bNormalize, &tzcalc, strFields);
 				} else if (strFirewallType == "fortg1k5") {
 					processFortiGate1K5(&strData, uiSkew, bNormalize, &tzcalc, strFields);
+				} else if (strFirewallType == "hirsch") {
+					processHirsch(&strData, uiSkew, bNormalize, &tzcalc, strFields);
 				} else {
 					strFields[LOG2MACTIME_LOG] = "-unknown";
 					strFields[LOG2MACTIME_DETAIL] = "Unknown Firewall Type";
