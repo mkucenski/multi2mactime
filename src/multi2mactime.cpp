@@ -777,7 +777,7 @@ int main(int argc, const char** argv) {
 
 	textFile txtFileObj;
 	vector<string> filenameVector;
-	string strFirewallType = "";
+	string strType = "";
 	string strCustom1 = "";
 	string strCustom2 = "";
 	u_int16_t uiYear = posix_time::second_clock::local_time().date().year();
@@ -787,11 +787,11 @@ int main(int argc, const char** argv) {
 	bool bHTMLDecode = false;
 
 	struct poptOption optionsTable[] = {
-		{"firewall",	'f',	POPT_ARG_STRING,	NULL,	10,	"Format for firewall log(s).", "firewall"},
-		{"year",			'y',	POPT_ARG_INT,		NULL,	20,	"Some firewall logs do not store the year in each entry.  Defaults to the current year.",	"year"},
-		{"timezone", 	'z',	POPT_ARG_STRING,	NULL,	30,	"POSIX timezone string (e.g. 'EST-5EDT,M4.1.0,M10.1.0' or 'GMT-5') indicating which zone the firewall logs are using. Defaults to GMT.", "zone"},
+		{"type",	't',	POPT_ARG_STRING,	NULL,	10,	"Format for data.", "type"},
+		{"year",			'y',	POPT_ARG_INT,		NULL,	20,	"Some logs do not store the year in each entry.  Defaults to the current year.",	"year"},
+		{"timezone", 	'z',	POPT_ARG_STRING,	NULL,	30,	"POSIX timezone string (e.g. 'EST-5EDT,M4.1.0,M10.1.0' or 'GMT-5') indicating which zone the logs are using. Defaults to GMT.", "zone"},
 		{"skew",			's',	POPT_ARG_INT,		NULL,	40,	"Adjust time values by given seconds.", "seconds"},
-		{"normalize",	'n',	POPT_ARG_NONE,		NULL,	50,	"Attempt to clean/normalize input data based on known issues with various types of firewall data. Use w/CAUTION and check stderr for results!"},
+		{"normalize",	'n',	POPT_ARG_NONE,		NULL,	50,	"Attempt to clean/normalize input data based on known issues with various types of data. Use w/CAUTION and check stderr for results!"},
 		//{"html-decode",'h',	POPT_ARG_NONE,		NULL, 60, 	"Execute multipass decoding of HTML encoded strings. Provides easier readability of URLs w/in URLs."},
 		{"custom1",		 0,	POPT_ARG_STRING,	NULL,	70,	"Custom value applicable to certain types of data.", "custom1"},
 		{"custom2",		 0,	POPT_ARG_STRING,	NULL,	80,	"Custom value applicable to certain types of data.", "custom2"},
@@ -812,7 +812,7 @@ int main(int argc, const char** argv) {
 	while (iOption >= 0) {
 		switch (iOption) {
 			case 10:
-				strFirewallType = poptGetOptArg(optCon);
+				strType = poptGetOptArg(optCon);
 				break;
 			case 20:
 				uiYear = strtol(poptGetOptArg(optCon), NULL, 10);
@@ -872,35 +872,35 @@ int main(int argc, const char** argv) {
 			string strHeader = txtFileObj.getFirstRow();
 
 			while (txtFileObj.getNextRow(&strData)) {
-				if (strFirewallType == "squidw3c") {
+				if (strType == "squidw3c") {
 	 				processSquidW3c(&strData, uiYear, uiSkew, bNormalize, &tzcalc, strFields, strSecondary);
-				} else if (strFirewallType == "symantec") {
+				} else if (strType == "symantec") {
 	 				processSymantec(&strData, uiYear, uiSkew, bNormalize, &tzcalc, strFields);
-				} else if (strFirewallType == "ipfw") {
+				} else if (strType == "ipfw") {
 					strFields[LOG2MACTIME_LOG] = "----ipfw";
 					strFields[LOG2MACTIME_DETAIL] = "Not Yet Implemented";
-				} else if (strFirewallType == "pf") {
+				} else if (strType == "pf") {
 					strFields[LOG2MACTIME_LOG] = "------pf";
 					strFields[LOG2MACTIME_DETAIL] = "Not Yet Implemented";
-				} else if (strFirewallType == "pix") {
+				} else if (strType == "pix") {
 					processPIX(&strData, uiSkew, bNormalize, &tzcalc, strFields);
-				} else if (strFirewallType == "juniper") {
+				} else if (strType == "juniper") {
 					processJuniper(&strData, uiSkew, bNormalize, &tzcalc, strFields);
-				} else if (strFirewallType == "custfsbt") {
+				} else if (strType == "custfsbt") {
 					processCustomFSBT(&strData, uiSkew, bNormalize, &tzcalc, strFields);
-				} else if (strFirewallType == "custfsem") {
+				} else if (strType == "custfsem") {
 					processCustomFSEM(&strData, uiSkew, bNormalize, &tzcalc, strFields);
-				} else if (strFirewallType == "cusvpns1") {
+				} else if (strType == "cusvpns1") {
 					processCustomVPN_S1(&strData, uiSkew, bNormalize, &tzcalc, strFields);
-				} else if (strFirewallType == "fortg1k5") {
+				} else if (strType == "fortg1k5") {
 					processFortiGate1K5(&strData, uiSkew, bNormalize, &tzcalc, strFields);
-				} else if (strFirewallType == "hirsch") {
+				} else if (strType == "hirsch") {
 					processHirsch(&strData, uiSkew, bNormalize, &tzcalc, strFields);
-				} else if (strFirewallType == "griffeye") {
+				} else if (strType == "griffeye") {
 					processGriffeyeCSV(&strData, &strHeader, uiSkew, bNormalize, &tzcalc, strFields);
 				} else {
 					strFields[LOG2MACTIME_LOG] = "-unknown";
-					strFields[LOG2MACTIME_DETAIL] = "Unknown Firewall Type";
+					strFields[LOG2MACTIME_DETAIL] = "Unknown Type";
 				}
 
 				// Output final mactime format
