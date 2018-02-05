@@ -31,7 +31,7 @@ Dependencies
 
 Build Instructions
 ------------------
-./bootstrap.sh
+./bootstrap
 mkdir build && cd build
 ../configure --prefix=...
 make
