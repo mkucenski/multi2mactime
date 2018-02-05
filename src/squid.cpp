@@ -77,16 +77,16 @@ void processSquidW3c(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool 
 	}
 
 	//Output Values
-	strFields[LOG2MACTIME_DETAIL]		= strName;
-	//strFields[LOG2MACTIME_TYPE]		= strService;
-	strFields[LOG2MACTIME_LOG]			= "squidw3c";
-	//strFields[LOG2MACTIME_FROM]		= strSrc;
-	//strFields[LOG2MACTIME_TO]		= strDst;
-	strFields[LOG2MACTIME_SIZE]		= strBytes;
-	strFields[LOG2MACTIME_ATIME]		= strTime;
-	//strFields[LOG2MACTIME_MTIME]	= 
-	//strFields[LOG2MACTIME_CTIME]	= 
-	//strFields[LOG2MACTIME_CRTIME]	= 
+	strFields[MULTI2MAC_DETAIL]	= strName;
+	//strFields[MULTI2MAC_TYPE]	= strService;
+	strFields[MULTI2MAC_LOG]		= "squidw3c";
+	//strFields[MULTI2MAC_FROM]	= strSrc;
+	//strFields[MULTI2MAC_TO]		= strDst;
+	strFields[MULTI2MAC_SIZE]		= strBytes;
+	strFields[MULTI2MAC_ATIME]		= strTime;
+	//strFields[MULTI2MAC_MTIME]	= 
+	//strFields[MULTI2MAC_CTIME]	= 
+	//strFields[MULTI2MAC_CRTIME]	= 
 	
 	//Find and passback the referal URL as a second entry for the timeline.
 	string strURI2 = 		findSubString(*pstrData, 0, " referer=", " ");
@@ -100,16 +100,16 @@ void processSquidW3c(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool 
 		}
 
 		//Output Values
-		strSecondary[LOG2MACTIME_DETAIL]	= strName2;
-		//strSecondary[LOG2MACTIME_TYPE]	= strService;
-		strSecondary[LOG2MACTIME_LOG]		= "squidw3c";
-		//strSecondary[LOG2MACTIME_FROM]	= strSrc;
-		//strSecondary[LOG2MACTIME_TO]		= strDst;
-		strSecondary[LOG2MACTIME_SIZE]		= strBytes;
-		strSecondary[LOG2MACTIME_ATIME]		= strTime;
-		//strSecondary[LOG2MACTIME_MTIME]	= 
-		//strSecondary[LOG2MACTIME_CTIME]	= 
-		//strSecondary[LOG2MACTIME_CRTIME]	= 
+		strSecondary[MULTI2MAC_DETAIL]	= strName2;
+		//strSecondary[MULTI2MAC_TYPE]	= strService;
+		strSecondary[MULTI2MAC_LOG]		= "squidw3c";
+		//strSecondary[MULTI2MAC_FROM]	= strSrc;
+		//strSecondary[MULTI2MAC_TO]		= strDst;
+		strSecondary[MULTI2MAC_SIZE]		= strBytes;
+		strSecondary[MULTI2MAC_ATIME]		= strTime;
+		//strSecondary[MULTI2MAC_MTIME]	= 
+		//strSecondary[MULTI2MAC_CTIME]	= 
+		//strSecondary[MULTI2MAC_CRTIME]	= 
 	}
 }
 

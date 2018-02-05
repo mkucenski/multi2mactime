@@ -41,15 +41,15 @@ void processFortiGate1K5(string* pstrData, u_int32_t uiSkew, bool bNormalize, ti
 								findSubString(*pstrData, 0, "rcvdbyte=", "\"");
 
 	//Output Values
-	strFields[LOG2MACTIME_DETAIL]		= strURL;
-	strFields[LOG2MACTIME_TYPE]		= strService;
-	strFields[LOG2MACTIME_LOG]			= "fortg1k5";
-	strFields[LOG2MACTIME_FROM]		= strSrc;
-	strFields[LOG2MACTIME_TO]			= strDst;
-	//strFields[LOG2MACTIME_SIZE]		= 
-	strFields[LOG2MACTIME_ATIME]		= strTime;
-	//strFields[LOG2MACTIME_MTIME]	= 
-	//strFields[LOG2MACTIME_CTIME]	= 
-	//strFields[LOG2MACTIME_CRTIME]	= 
+	strFields[MULTI2MAC_DETAIL]	= strURL;
+	strFields[MULTI2MAC_TYPE]		= strService;
+	strFields[MULTI2MAC_LOG]		= "fortg1k5";
+	strFields[MULTI2MAC_FROM]		= strSrc;
+	strFields[MULTI2MAC_TO]			= strDst;
+	//strFields[MULTI2MAC_SIZE]	= 
+	strFields[MULTI2MAC_ATIME]		= strTime;
+	//strFields[MULTI2MAC_MTIME]	= 
+	//strFields[MULTI2MAC_CTIME]	= 
+	//strFields[MULTI2MAC_CRTIME]	= 
 }
 

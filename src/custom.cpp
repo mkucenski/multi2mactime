@@ -73,16 +73,16 @@ void processCustomVPN_S1(string* pstrData, u_int32_t uiSkew, bool bNormalize, ti
 		}
 	
 		//Output Values
-		strFields[LOG2MACTIME_DETAIL]		= delimText.getField(2);	//username
-		//strFields[LOG2MACTIME_TYPE]		= strService;
-		strFields[LOG2MACTIME_LOG]			= "-----vpn";
-		strFields[LOG2MACTIME_FROM]		= delimText.getField(3);	//src_ip
-		strFields[LOG2MACTIME_TO]			= delimText.getField(4);	//dst_ip
-		//strFields[LOG2MACTIME_SIZE]		= 
-		strFields[LOG2MACTIME_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
-		//strFields[LOG2MACTIME_MTIME]	= 
-		//strFields[LOG2MACTIME_CTIME]	= 
-		//strFields[LOG2MACTIME_CRTIME]	= 
+		strFields[MULTI2MAC_DETAIL]	= delimText.getField(2);	//username
+		//strFields[MULTI2MAC_TYPE]	= strService;
+		strFields[MULTI2MAC_LOG]		= "-----vpn";
+		strFields[MULTI2MAC_FROM]		= delimText.getField(3);	//src_ip
+		strFields[MULTI2MAC_TO]			= delimText.getField(4);	//dst_ip
+		//strFields[MULTI2MAC_SIZE]	= 
+		strFields[MULTI2MAC_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
+		//strFields[MULTI2MAC_MTIME]	= 
+		//strFields[MULTI2MAC_CTIME]	= 
+		//strFields[MULTI2MAC_CRTIME]	= 
 
 	} //if (strDate != "Date") {
 }
@@ -126,16 +126,16 @@ void processCustomFSEM(string* pstrData, u_int32_t uiSkew, bool bNormalize, time
 	string strPort = findSubString(strIPPort, 0, " :", "");
 
 	//Output Values
-	strFields[LOG2MACTIME_DETAIL]		= delimText.getField(2);
-	//strFields[LOG2MACTIME_TYPE]		= strService;
-	strFields[LOG2MACTIME_LOG]			= "---emule";
-	strFields[LOG2MACTIME_FROM]		= strIP;
-	//strFields[LOG2MACTIME_TO]		= strDst;
-	//strFields[LOG2MACTIME_SIZE]		= 
-	strFields[LOG2MACTIME_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
-	//strFields[LOG2MACTIME_MTIME]	= 
-	//strFields[LOG2MACTIME_CTIME]	= 
-	//strFields[LOG2MACTIME_CRTIME]	= 
+	strFields[MULTI2MAC_DETAIL]		= delimText.getField(2);
+	//strFields[MULTI2MAC_TYPE]		= strService;
+	strFields[MULTI2MAC_LOG]			= "---emule";
+	strFields[MULTI2MAC_FROM]		= strIP;
+	//strFields[MULTI2MAC_TO]		= strDst;
+	//strFields[MULTI2MAC_SIZE]		= 
+	strFields[MULTI2MAC_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
+	//strFields[MULTI2MAC_MTIME]	= 
+	//strFields[MULTI2MAC_CTIME]	= 
+	//strFields[MULTI2MAC_CRTIME]	= 
 }
 
 void processCustomFSBT(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
@@ -179,15 +179,15 @@ void processCustomFSBT(string* pstrData, u_int32_t uiSkew, bool bNormalize, time
 	string strPort = findSubString(strIPPort, 0, " :", "");
 
 	//Output Values
-	strFields[LOG2MACTIME_DETAIL]		= delimText.getField(2);
-	//strFields[LOG2MACTIME_TYPE]		= strService;
-	strFields[LOG2MACTIME_LOG]			= "bittorre";
-	strFields[LOG2MACTIME_FROM]		= strIP;
-	//strFields[LOG2MACTIME_TO]		= strDst;
-	strFields[LOG2MACTIME_SIZE]		= delimText.getField(4);
-	strFields[LOG2MACTIME_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
-	//strFields[LOG2MACTIME_MTIME]	= 
-	//strFields[LOG2MACTIME_CTIME]	= 
-	//strFields[LOG2MACTIME_CRTIME]	= 
+	strFields[MULTI2MAC_DETAIL]		= delimText.getField(2);
+	//strFields[MULTI2MAC_TYPE]		= strService;
+	strFields[MULTI2MAC_LOG]			= "bittorre";
+	strFields[MULTI2MAC_FROM]		= strIP;
+	//strFields[MULTI2MAC_TO]		= strDst;
+	strFields[MULTI2MAC_SIZE]		= delimText.getField(4);
+	strFields[MULTI2MAC_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
+	//strFields[MULTI2MAC_MTIME]	= 
+	//strFields[MULTI2MAC_CTIME]	= 
+	//strFields[MULTI2MAC_CRTIME]	= 
 }
 

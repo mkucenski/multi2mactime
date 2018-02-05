@@ -131,11 +131,11 @@ int main(int argc, const char** argv) {
 				} else if (strType == "symantec") {
 	 				processSymantec(&strData, uiYear, uiSkew, bNormalize, &tzcalc, strFields);
 				} else if (strType == "ipfw") {
-					strFields[LOG2MACTIME_LOG] = "----ipfw";
-					strFields[LOG2MACTIME_DETAIL] = "Not Yet Implemented";
+					strFields[MULTI2MAC_LOG] = "----ipfw";
+					strFields[MULTI2MAC_DETAIL] = "Not Yet Implemented";
 				} else if (strType == "pf") {
-					strFields[LOG2MACTIME_LOG] = "------pf";
-					strFields[LOG2MACTIME_DETAIL] = "Not Yet Implemented";
+					strFields[MULTI2MAC_LOG] = "------pf";
+					strFields[MULTI2MAC_DETAIL] = "Not Yet Implemented";
 				} else if (strType == "pix") {
 					processPIX(&strData, uiSkew, bNormalize, &tzcalc, strFields);
 				} else if (strType == "juniper") {
@@ -153,37 +153,37 @@ int main(int argc, const char** argv) {
 				} else if (strType == "griffeye") {
 					processGriffeyeCSV(&strData, &strHeader, uiSkew, bNormalize, &tzcalc, strFields);
 				} else {
-					strFields[LOG2MACTIME_LOG] = "-unknown";
-					strFields[LOG2MACTIME_DETAIL] = "Unknown Type";
+					strFields[MULTI2MAC_LOG] = "-unknown";
+					strFields[MULTI2MAC_DETAIL] = "Unknown Type";
 				}
 
 				// Output final mactime format
-				cout 					<< strFields[LOG2MACTIME_HASH]	<< "|"
-										<< strFields[LOG2MACTIME_DETAIL]	<< "|"
-										<< strFields[LOG2MACTIME_TYPE]	<< "|"
-						<< "log-"	<< strFields[LOG2MACTIME_LOG]		<< "|"
-										<< strFields[LOG2MACTIME_FROM]	<< "|"
-										<< strFields[LOG2MACTIME_TO]		<< "|"
-										<< strFields[LOG2MACTIME_SIZE]	<< "|"
-										<< strFields[LOG2MACTIME_ATIME]	<< "|"
-										<< strFields[LOG2MACTIME_MTIME]	<< "|"
-										<< strFields[LOG2MACTIME_CTIME]	<< "|"
-										<< strFields[LOG2MACTIME_CRTIME]	<< "\n";
+				cout 					<< strFields[MULTI2MAC_HASH]		<< "|"
+										<< strFields[MULTI2MAC_DETAIL]	<< "|"
+										<< strFields[MULTI2MAC_TYPE]		<< "|"
+						<< "log-"	<< strFields[MULTI2MAC_LOG]		<< "|"
+										<< strFields[MULTI2MAC_FROM]		<< "|"
+										<< strFields[MULTI2MAC_TO]			<< "|"
+										<< strFields[MULTI2MAC_SIZE]		<< "|"
+										<< strFields[MULTI2MAC_ATIME]		<< "|"
+										<< strFields[MULTI2MAC_MTIME]		<< "|"
+										<< strFields[MULTI2MAC_CTIME]		<< "|"
+										<< strFields[MULTI2MAC_CRTIME]	<< "\n";
 
 				// If secondary records created, output them in mactime format also
-				if (strSecondary[LOG2MACTIME_DETAIL] != "") {
-					cout 					<< strSecondary[LOG2MACTIME_HASH]		<< "|"
-											<< strSecondary[LOG2MACTIME_DETAIL]	<< "|"
-											<< strSecondary[LOG2MACTIME_TYPE]		<< "|"
-							<< "log-"	<< strSecondary[LOG2MACTIME_LOG]		<< "|"
-											<< strSecondary[LOG2MACTIME_FROM]		<< "|"
-											<< strSecondary[LOG2MACTIME_TO]			<< "|"
-											<< strSecondary[LOG2MACTIME_SIZE]		<< "|"
-											<< strSecondary[LOG2MACTIME_ATIME]		<< "|"
-											<< strSecondary[LOG2MACTIME_MTIME]		<< "|"
-											<< strSecondary[LOG2MACTIME_CTIME]		<< "|"
-											<< strSecondary[LOG2MACTIME_CRTIME]	<< "\n";
-				} //if (strSecondary[LOG2MACTIME_DETAIL] != "") {
+				if (strSecondary[MULTI2MAC_DETAIL] != "") {
+					cout 					<< strSecondary[MULTI2MAC_HASH]		<< "|"
+											<< strSecondary[MULTI2MAC_DETAIL]	<< "|"
+											<< strSecondary[MULTI2MAC_TYPE]		<< "|"
+							<< "log-"	<< strSecondary[MULTI2MAC_LOG]		<< "|"
+											<< strSecondary[MULTI2MAC_FROM]		<< "|"
+											<< strSecondary[MULTI2MAC_TO]			<< "|"
+											<< strSecondary[MULTI2MAC_SIZE]		<< "|"
+											<< strSecondary[MULTI2MAC_ATIME]		<< "|"
+											<< strSecondary[MULTI2MAC_MTIME]		<< "|"
+											<< strSecondary[MULTI2MAC_CTIME]		<< "|"
+											<< strSecondary[MULTI2MAC_CRTIME]	<< "\n";
+				} //if (strSecondary[MULTI2MAC_DETAIL] != "") {
 			}
 		} else {
 		}

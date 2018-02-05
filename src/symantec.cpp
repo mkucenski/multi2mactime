@@ -47,15 +47,15 @@ void processSymantec(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool 
 	string strDst = findSubString(*pstrData, 23, "dst=", "/");
 
 	//Output Values
-	strFields[LOG2MACTIME_DETAIL]		= strMsg;
-	strFields[LOG2MACTIME_TYPE]		= strMsgType;
-	strFields[LOG2MACTIME_LOG]			= "symantec";
-	strFields[LOG2MACTIME_FROM]		= strSrc;
-	strFields[LOG2MACTIME_TO]			= strDst;
-	strFields[LOG2MACTIME_SIZE]		= strBytes;
-	strFields[LOG2MACTIME_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
-	//strFields[LOG2MACTIME_MTIME]	= 
-	//strFields[LOG2MACTIME_CTIME]	= 
-	//strFields[LOG2MACTIME_CRTIME]	= 
+	strFields[MULTI2MAC_DETAIL]	= strMsg;
+	strFields[MULTI2MAC_TYPE]		= strMsgType;
+	strFields[MULTI2MAC_LOG]		= "symantec";
+	strFields[MULTI2MAC_FROM]		= strSrc;
+	strFields[MULTI2MAC_TO]			= strDst;
+	strFields[MULTI2MAC_SIZE]		= strBytes;
+	strFields[MULTI2MAC_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
+	//strFields[MULTI2MAC_MTIME]	= 
+	//strFields[MULTI2MAC_CTIME]	= 
+	//strFields[MULTI2MAC_CRTIME]	= 
 }
 
