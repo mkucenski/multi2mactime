@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT(fw2mactime, 20170913)
+AC_INIT(fw2mactime, 20180201)
 AC_CONFIG_SRCDIR([src/fw2mactime.cpp])
 AM_INIT_AUTOMAKE
 

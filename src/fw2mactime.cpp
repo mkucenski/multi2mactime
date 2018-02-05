@@ -49,6 +49,185 @@ using namespace std;
 #define LOG2MACTIME_CTIME	TSK3_MACTIME_CTIME
 #define LOG2MACTIME_CRTIME	TSK3_MACTIME_CRTIME
 
+void processGriffeyeCSV(string* pstrData, string* pstrHeader, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
+	DEBUG_INFO(PACKAGE << ":processGriffeyeCSV()");
+	//1	Binary Copies	3
+	//2	Bookmarks	
+	//3	Can File Be Opened?	True
+	//4	Category	Child Exploitive (non-CAM) / Age Difficult
+	//5	Created Date	1/10/2009 8:16:10 PM
+	//6	Database Match Conflict	
+	//7	DB: Default Database	-1
+	//8	DB: NSRL	-1
+	//9	DB: PhotoDNA	-1
+	//10	DB: ProjectVIC	-1
+	//11	DB: ProjectVIC PhotoDNA	2
+	//12	Deleted?	True
+	//13	Directory Path	"..."
+	//14	Distributed	Distributed
+	//15	Exif Serial Number	
+	//16	Exif: Author	
+	//17	Exif: City	
+	//18	Exif: Comment	"..."
+	//19	Exif: CreateDate	
+	//20	Exif: ImageUniqueId	
+	//21	Exif: Make	
+	//22	Exif: Model	
+	//23	Exif: Software	
+	//24	Exif: Title	
+	//25	File Extension	.jpg
+	//26	File Location	...
+	//27	File Name	...
+	//28	File Size	37590
+	//29	File Type	Image
+	//30	Has Exif/GPS Informtion	Relevant Exif
+	//31	Has Sound	False
+	//32	Height	450
+	//33	Identified	Not Identified
+	//34	Initial Category	2
+	//35	Is Animated	False
+	//36	Last Accessed	12/29/2009 12:10:18 AM
+	//37	Last Write Time	2/4/2008 6:12:15 AM
+	//38	Latitude	0
+	//39	Length	
+	//40	Longitude	0
+	//41	MD5	...
+	//42	Mime Type	image/jpeg
+	//43	Nudity Level	11
+	//44	Overwritten?	False
+	//45	PhotoDNA	...
+	//46	Physical Location	
+	//47	Representative	False
+	//48	Series Name	US/Pink wall
+	//49	SHA-1	...
+	//50	SHA-256	...
+	//51	SHA-384	...
+	//52	SHA-512	...
+	//53	Source ID	...
+	//54	Tags	#...
+	//55	Unallocated	True
+	//56	User Comment	
+	//57	Visual Copies	6
+	//58	Visual Group	25787
+	//59	Width	600
+
+	delimTextRow delimText(*pstrData, ',', '"');
+	delimTextRow delimHeader(*pstrHeader, ',', '"');
+
+	//5	Created Date	1/10/2009 8:16:10 PM
+	//36	Last Accessed	12/29/2009 12:10:18 AM
+	//37	Last Write Time	2/4/2008 6:12:15 AM
+	string strCreated = delimText.getValue(delimHeader.getColumnByValue("Created Date"));
+	string strAccessed = delimText.getValue(delimHeader.getColumnByValue("Last Accessed"));
+	string strModified = delimText.getValue(delimHeader.getColumnByValue("Last Write Time"));
+
+	int32_t crTimeVal = -1; 
+	if (strCreated.length()) {
+		delimTextRow delimDateTime(strCreated, ' ');
+		delimTextRow delimDate(delimDateTime.getField(0), '/');
+		delimTextRow delimTime(delimDateTime.getField(1), ':');
+
+		u_int16_t uiHour = boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(0));
+		u_int16_t uiHourDbg = uiHour;
+		if (delimDateTime.getField(2) == "PM") {
+			if (uiHour != 12) {
+				uiHour += 12;
+			}
+		} else {
+			if (uiHour == 12) {
+				uiHour = 0;
+			}
+		}
+		try {
+		local_time::local_date_time ldt = pTZCalc->createLocalTime(	boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(0)),	//month
+							 															boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(1)),	//day
+																						boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(2)),	//year
+																						uiHour, 																			//hour
+																						boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(1)),	//minute
+																						boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(2)))	//second
+																						+ posix_time::seconds(uiSkew);
+		crTimeVal = getUnix32FromLocalTime(ldt);
+		} catch (...) {
+			return;
+		}
+	}
+	
+	int32_t aTimeVal = -1; 
+	if (strAccessed.length()) {
+		delimTextRow delimDateTime(strAccessed, ' ');
+		delimTextRow delimDate(delimDateTime.getField(0), '/');
+		delimTextRow delimTime(delimDateTime.getField(1), ':');
+
+		u_int16_t uiHour = boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(0));
+		u_int16_t uiHourDbg = uiHour;
+		if (delimDateTime.getField(2) == "PM") {
+			if (uiHour != 12) {
+				uiHour += 12;
+			}
+		} else {
+			if (uiHour == 12) {
+				uiHour = 0;
+			}
+		}
+		try {
+		local_time::local_date_time ldt = pTZCalc->createLocalTime(	boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(0)),	//month
+							 															boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(1)),	//day
+																						boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(2)),	//year
+																						uiHour, 																			//hour
+																						boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(1)),	//minute
+																						boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(2)))	//second
+																						+ posix_time::seconds(uiSkew);
+		aTimeVal = getUnix32FromLocalTime(ldt);
+		} catch (...) {
+			return;
+		}
+	}
+
+	int32_t mTimeVal = -1; 
+	if (strModified.length()) {
+		delimTextRow delimDateTime(strModified, ' ');
+		delimTextRow delimDate(delimDateTime.getField(0), '/');
+		delimTextRow delimTime(delimDateTime.getField(1), ':');
+
+		u_int16_t uiHour = boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(0));
+		u_int16_t uiHourDbg = uiHour;
+		if (delimDateTime.getField(2) == "PM") {
+			if (uiHour != 12) {
+				uiHour += 12;
+			}
+		} else {
+			if (uiHour == 12) {
+				uiHour = 0;
+			}
+		}
+		try {
+		local_time::local_date_time ldt = pTZCalc->createLocalTime(	boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(0)),	//month
+							 															boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(1)),	//day
+																						boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(2)),	//year
+																						uiHour, 																			//hour
+																						boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(1)),	//minute
+																						boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(2)))	//second
+																						+ posix_time::seconds(uiSkew);
+		mTimeVal = getUnix32FromLocalTime(ldt);
+		} catch (...) {
+			return;
+		}
+	}
+
+	//Output Values
+	strFields[TSK3_MACTIME_MD5]		= delimText.getValue(delimHeader.getColumnByValue("MD5"));
+	strFields[TSK3_MACTIME_NAME]		= delimText.getValue(delimHeader.getColumnByValue("Directory Path")) + "\\" + delimText.getValue(delimHeader.getColumnByValue("File Name"));
+	//strFields[TSK3_MACTIME_INODE]		= 
+	strFields[TSK3_MACTIME_PERMS]		= "griffeye";
+	//strFields[TSK3_MACTIME_UID]		= 
+	//strFields[TSK3_MACTIME_GID]		= 
+	strFields[TSK3_MACTIME_SIZE]		= delimText.getValue(delimHeader.getColumnByValue("File Size"));
+	strFields[TSK3_MACTIME_ATIME]		= (aTimeVal > 0 ? boost_lexical_cast_wrapper<string>(aTimeVal) : "");
+	strFields[TSK3_MACTIME_MTIME]		= (mTimeVal > 0 ? boost_lexical_cast_wrapper<string>(mTimeVal) : "");
+	//strFields[TSK3_MACTIME_CTIME]		= 
+	strFields[TSK3_MACTIME_CRTIME]	= (crTimeVal > 0 ? boost_lexical_cast_wrapper<string>(crTimeVal) : "");
+}
+
 void processHirsch(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
 	DEBUG_INFO(PACKAGE << ":processHirsch()");
 	//"	   Host Date/Time BETWEEN '2017-08-23 00:00:00' AND '2017-08-25 23:59:59'   ","<SITE>","All Events Log By Date","Print Time:","8/30/2017","12:07:07PM","Printed by:","<USER>","Sequence ID","Host Date/Time","Controller Date/Time","Description","Event ID","Address",285061,"8/25/2017  11:59:59PM","8/26/2017  12:00:00AM","Updating temporary users",8010,"\\XNET.001.0004.001.01","Page -1 of 1"
@@ -373,14 +552,16 @@ void processCustomFSBT(string* pstrData, u_int32_t uiSkew, bool bNormalize, time
 
 	//Date (UTC)	IP		Infohash		Severity		No. Of FOI (tab-separated, copy/paste from website)
 	//"8/1/2017  8:06:25 AM"
-	delimTextRow delimText(*pstrData, '\t');
-	string strDateTime = delimText.getField(0);
-	delimTextRow delimDateTime(strDateTime, ' ');
-	delimTextRow delimDate(delimDateTime.getField(0), '/');
-	delimTextRow delimTime(delimDateTime.getField(1), ':');
 
+	delimTextRow delimText(*pstrData, '\t');
+
+	string strDateTime = delimText.getField(0);
 	int32_t timeVal = -1; 
 	if (strDateTime.length()) {
+		delimTextRow delimDateTime(strDateTime, ' ');
+		delimTextRow delimDate(delimDateTime.getField(0), '/');
+		delimTextRow delimTime(delimDateTime.getField(1), ':');
+
 		u_int16_t uiHour = boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(0));
 		u_int16_t uiHourDbg = uiHour;
 		if (delimDateTime.getField(2) == "PM") {
@@ -688,6 +869,8 @@ int main(int argc, const char** argv) {
 			string strFields[11];
 			string strSecondary[11];
 
+			string strHeader = txtFileObj.getFirstRow();
+
 			while (txtFileObj.getNextRow(&strData)) {
 				if (strFirewallType == "squidw3c") {
 	 				processSquidW3c(&strData, uiYear, uiSkew, bNormalize, &tzcalc, strFields, strSecondary);
@@ -713,6 +896,8 @@ int main(int argc, const char** argv) {
 					processFortiGate1K5(&strData, uiSkew, bNormalize, &tzcalc, strFields);
 				} else if (strFirewallType == "hirsch") {
 					processHirsch(&strData, uiSkew, bNormalize, &tzcalc, strFields);
+				} else if (strFirewallType == "griffeye") {
+					processGriffeyeCSV(&strData, &strHeader, uiSkew, bNormalize, &tzcalc, strFields);
 				} else {
 					strFields[LOG2MACTIME_LOG] = "-unknown";
 					strFields[LOG2MACTIME_DETAIL] = "Unknown Firewall Type";
