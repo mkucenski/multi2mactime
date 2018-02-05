@@ -1,10 +1,8 @@
-fw2mactime
+multi2mactime
 ==========
-This utility was designed to understand/process several types of firewall logs into a format compatible with [The SleuthKit's](https://github.com/sleuthkit/sleuthkit) 'mactime' such that filesystem timeline data and network activity timeline data can be viewed together. This utility was created to be used with my [datatime](https://github.com/mkucenski/datatime) alternative to mactime.
+This utility was designed to understand/process several types of logs into a format compatible with [The SleuthKit's](https://github.com/sleuthkit/sleuthkit) 'mactime' such that filesystem timeline data and network activity timeline data can be viewed together. This utility was created to be used with my [datatime](https://github.com/mkucenski/datatime) alternative to mactime.
 
-NOTE: While this code compiles, it was written several years ago based on an older version of The SleuthKit's "body" format. It needs to be udated based on the TSK3.x format.
-
-NOTE: This utility should be updated to support "plug-in" definitions of firewall logs, instead of hard-coding. It was originally written to specifally support only a limited number of firewall logs.
+NOTE: This utility should be updated to support "plug-in" definitions of logs, instead of hard-coding. It was originally written to specifally support only a limited number of logs.
 
 License
 -------
@@ -35,12 +33,10 @@ Dependencies
 Notes
 -----
 ```
-Normal mactime for files
-"    |FILENAME | |INODE   | |PERMISSIONS| |UID       |GID       |       |SIZE     |ATIME  |MTIME  |CTIME    | |
+Sleuthkit TSK3.x body format
+0		|1			|2			|3			|4		|5		|6		|7			|8			|9			|10
+MD5	|NAME		|INODE	|PERMS	|UID	|GID	|SIZE	|ATIME	|MTIME	|CTIME	|CRTIME
 
-Mactime for event records
-REC#|EVENTFILE| |EVENTID | |SOURCE     | |SID       |COMPUTER  |       |TYPE     |       |WRITTEN|GENERATED| |
-
-Mactime for firewall records
-FWL |MESSAGE  | |MSG-TYPE| |SERVICE    | |SRCIP     |DESTIP    |RAWDATA|SENT/RECV|       |       |GENERATED| |
+multi2mactime
+HASH	|DETAIL	|TYPE		|LOG-SRC	|FROM	|TO	|SIZE	|ATIME	|MTIME	|CTIME	|CRTIME
 ```
