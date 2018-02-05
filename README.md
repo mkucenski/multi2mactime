@@ -20,7 +20,6 @@ limitations under the License.
 
 Detailed Description
 --------------------
-
 TODO
 
 Dependencies
@@ -29,6 +28,13 @@ Dependencies
 * [Boost Date-Time](http://www.boost.org)
 * [My libdelimText](https://github.com/mkucenski/libdelimText)
 * [My libtimeUtils](https://github.com/mkucenski/libtimeUtils)
+
+Build Instructions
+------------------
+./bootstrap.sh
+mkdir build && cd build
+../configure --prefix=...
+make
 
 Notes
 -----
@@ -40,3 +46,4 @@ MD5	|NAME		|INODE	|PERMS	|UID	|GID	|SIZE	|ATIME	|MTIME	|CTIME	|CRTIME
 multi2mactime
 HASH	|DETAIL	|TYPE		|LOG-SRC	|FROM	|TO	|SIZE	|ATIME	|MTIME	|CTIME	|CRTIME
 ```
+
