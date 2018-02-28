@@ -14,6 +14,7 @@
 
 //#define _DEBUG_
 #include "misc/debugMsgs.h"
+#include "misc/errMsgs.h"
 
 #include "processor.h"
 
@@ -27,7 +28,7 @@ using namespace std;
 #include "misc/boost_lexical_cast_wrapper.hpp"
 
 void processSymantec(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
-	DEBUG_INFO(PACKAGE << ":processSymantec()");
+	DEBUG("processSymantec()");
 
 	local_time::local_date_time ldt = pTZCalc->createLocalTime(boost_lexical_cast_wrapper<string>(uiYear) + " " + string(*pstrData, 0, 19), "%Y %b %d %H:%M:%S%F") + posix_time::seconds(uiSkew);
 	int32_t timeVal = getUnix32FromLocalTime(ldt);
@@ -49,13 +50,13 @@ void processSymantec(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool 
 	//Output Values
 	strFields[MULTI2MAC_DETAIL]	= strMsg;
 	strFields[MULTI2MAC_TYPE]		= strMsgType;
-	strFields[MULTI2MAC_LOG]		= "symantec";
+	strFields[MULTI2MAC_LOG]		= "----symantec";
 	strFields[MULTI2MAC_FROM]		= strSrc;
 	strFields[MULTI2MAC_TO]			= strDst;
 	strFields[MULTI2MAC_SIZE]		= strBytes;
 	strFields[MULTI2MAC_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
 	//strFields[MULTI2MAC_MTIME]	= 
 	//strFields[MULTI2MAC_CTIME]	= 
-	//strFields[MULTI2MAC_CRTIME]	= 
+	//strFields[MULTI2MAC_BTIME]	= 
 }
 

@@ -14,6 +14,7 @@
 
 //#define _DEBUG_
 #include "misc/debugMsgs.h"
+#include "misc/errMsgs.h"
 
 #include "processor.h"
 
@@ -27,7 +28,7 @@ using namespace std;
 #include "misc/boost_lexical_cast_wrapper.hpp"
 
 void processCustomVPN_S1(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
-	DEBUG_INFO(PACKAGE << ":processCustomVPN_S1()");
+	DEBUG("processCustomVPN_S1()");
 
 	//Date,Time,user,src_ip,dest_ip
 	//2/12/17,15:59:31
@@ -40,7 +41,7 @@ void processCustomVPN_S1(string* pstrData, u_int32_t uiSkew, bool bNormalize, ti
 
 		int32_t timeVal = -1; 
 		if (strDate.length() && strTime.length()) {
-			DEBUG_INFO(	strDate << " " << strTime << "\n" <<
+			DEBUG(	strDate << " " << strTime << "\n" <<
 							" month:"	<< boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(0)) <<
 							" day:"		<< boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(1)) <<
 							" year:"		<< boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(2)) <<
@@ -67,7 +68,7 @@ void processCustomVPN_S1(string* pstrData, u_int32_t uiSkew, bool bNormalize, ti
 				local_time::local_date_time ldt = pTZCalc->createLocalTime(uiMonth, uiDay, uiYear, uiHour, uiMin, uiSec) + posix_time::seconds(uiSkew);
 				timeVal = getUnix32FromLocalTime(ldt);
 			} else {
-					  DEBUG_INFO("whoops");
+					  DEBUG("whoops");
 				//ERROR
 			} //if (	(1 <= uiMonth && uiMonth <= 12) &&
 		}
@@ -75,20 +76,20 @@ void processCustomVPN_S1(string* pstrData, u_int32_t uiSkew, bool bNormalize, ti
 		//Output Values
 		strFields[MULTI2MAC_DETAIL]	= delimText.getField(2);	//username
 		//strFields[MULTI2MAC_TYPE]	= strService;
-		strFields[MULTI2MAC_LOG]		= "-----vpn";
+		strFields[MULTI2MAC_LOG]		= "---------vpn";
 		strFields[MULTI2MAC_FROM]		= delimText.getField(3);	//src_ip
 		strFields[MULTI2MAC_TO]			= delimText.getField(4);	//dst_ip
 		//strFields[MULTI2MAC_SIZE]	= 
 		strFields[MULTI2MAC_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
 		//strFields[MULTI2MAC_MTIME]	= 
 		//strFields[MULTI2MAC_CTIME]	= 
-		//strFields[MULTI2MAC_CRTIME]	= 
+		//strFields[MULTI2MAC_BTIME]	= 
 
 	} //if (strDate != "Date") {
 }
 
 void processCustomFSEM(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
-	DEBUG_INFO(PACKAGE << ":processCustomFSEM()");
+	DEBUG("processCustomFSEM()");
 
 	//Date (UTC)				IP							ed2k Hash									Filename
 	// 8/1/2016 8:11:17 PM	107.77.172.33 :8004	54972296B9DD3CFE194FD3328827DD42	
@@ -128,18 +129,18 @@ void processCustomFSEM(string* pstrData, u_int32_t uiSkew, bool bNormalize, time
 	//Output Values
 	strFields[MULTI2MAC_DETAIL]		= delimText.getField(2);
 	//strFields[MULTI2MAC_TYPE]		= strService;
-	strFields[MULTI2MAC_LOG]			= "---emule";
+	strFields[MULTI2MAC_LOG]			= "-------emule";
 	strFields[MULTI2MAC_FROM]		= strIP;
 	//strFields[MULTI2MAC_TO]		= strDst;
 	//strFields[MULTI2MAC_SIZE]		= 
 	strFields[MULTI2MAC_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
 	//strFields[MULTI2MAC_MTIME]	= 
 	//strFields[MULTI2MAC_CTIME]	= 
-	//strFields[MULTI2MAC_CRTIME]	= 
+	//strFields[MULTI2MAC_BTIME]	= 
 }
 
 void processCustomFSBT(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
-	DEBUG_INFO(PACKAGE << ":processCustomFSBT()");
+	DEBUG("processCustomFSBT()");
 
 	//Date (UTC)	IP		Infohash		Severity		No. Of FOI (tab-separated, copy/paste from website)
 	//"8/1/2017  8:06:25 AM"
@@ -181,13 +182,13 @@ void processCustomFSBT(string* pstrData, u_int32_t uiSkew, bool bNormalize, time
 	//Output Values
 	strFields[MULTI2MAC_DETAIL]		= delimText.getField(2);
 	//strFields[MULTI2MAC_TYPE]		= strService;
-	strFields[MULTI2MAC_LOG]			= "bittorre";
+	strFields[MULTI2MAC_LOG]			= "---bittorret";
 	strFields[MULTI2MAC_FROM]		= strIP;
 	//strFields[MULTI2MAC_TO]		= strDst;
 	strFields[MULTI2MAC_SIZE]		= delimText.getField(4);
 	strFields[MULTI2MAC_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
 	//strFields[MULTI2MAC_MTIME]	= 
 	//strFields[MULTI2MAC_CTIME]	= 
-	//strFields[MULTI2MAC_CRTIME]	= 
+	//strFields[MULTI2MAC_BTIME]	= 
 }
 

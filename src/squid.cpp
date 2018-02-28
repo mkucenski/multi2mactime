@@ -14,6 +14,7 @@
 
 //#define _DEBUG_
 #include "misc/debugMsgs.h"
+#include "misc/errMsgs.h"
 
 #include "processor.h"
 
@@ -27,7 +28,7 @@ using namespace std;
 #include "misc/boost_lexical_cast_wrapper.hpp"
 
 void processSquidW3c(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields, string* strSecondary) {
-	DEBUG_INFO(PACKAGE << ":processSquidW3c()" << "[" << *pstrData << "]");
+	DEBUG("processSquidW3c()" << "[" << *pstrData << "]");
 	// Squid has their own log format, but allow custom log formats; this one
 	//	seems loosely based on the W3C specs: https://www.w3.org/TR/WDlogfile.html
 	// With the exception of [logfile:] and [date/time;], the rest of the fields
@@ -55,7 +56,7 @@ void processSquidW3c(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool 
 	//TODO - This is a problem... some of these logs files come with the log file included in the data; others do not. Need a more robust way to handle both options.
 	// string strTime = 		findSubString(*pstrData, 0, "", ".");
 	string strTime = 		findSubString(*pstrData, 0, "", ".");
-	DEBUG_INFO(strTime);
+	DEBUG(strTime);
 	
 	string strSrc = 		findSubString(*pstrData, 0, " c_ip=", " ") +
 								"/" + findSubString(*pstrData, 0, " cs_ip=", " ") + ":" +
@@ -78,15 +79,15 @@ void processSquidW3c(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool 
 
 	//Output Values
 	strFields[MULTI2MAC_DETAIL]	= strName;
-	//strFields[MULTI2MAC_TYPE]	= strService;
-	strFields[MULTI2MAC_LOG]		= "squidw3c";
-	//strFields[MULTI2MAC_FROM]	= strSrc;
-	//strFields[MULTI2MAC_TO]		= strDst;
+	//strFields[MULTI2MAC_TYPE]		= strService;
+	strFields[MULTI2MAC_LOG]		= "----squidw3c";
+	//strFields[MULTI2MAC_FROM]		= strSrc;
+	//strFields[MULTI2MAC_TO]			= strDst;
 	strFields[MULTI2MAC_SIZE]		= strBytes;
 	strFields[MULTI2MAC_ATIME]		= strTime;
 	//strFields[MULTI2MAC_MTIME]	= 
 	//strFields[MULTI2MAC_CTIME]	= 
-	//strFields[MULTI2MAC_CRTIME]	= 
+	//strFields[MULTI2MAC_BTIME]	= 
 	
 	//Find and passback the referal URL as a second entry for the timeline.
 	string strURI2 = 		findSubString(*pstrData, 0, " referer=", " ");
@@ -101,15 +102,15 @@ void processSquidW3c(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool 
 
 		//Output Values
 		strSecondary[MULTI2MAC_DETAIL]	= strName2;
-		//strSecondary[MULTI2MAC_TYPE]	= strService;
-		strSecondary[MULTI2MAC_LOG]		= "squidw3c";
-		//strSecondary[MULTI2MAC_FROM]	= strSrc;
-		//strSecondary[MULTI2MAC_TO]		= strDst;
-		strSecondary[MULTI2MAC_SIZE]		= strBytes;
+		//strSecondary[MULTI2MAC_TYPE]		= strService;
+		strSecondary[MULTI2MAC_LOG]		= "----squidw3c";
+		//strSecondary[MULTI2MAC_FROM]		= strSrc;
+		//strSecondary[MULTI2MAC_TO]			= strDst;
+		strSecondary[MULTI2MAC_SIZE]		= strBytes; //While this value doesn't really relate to the referer value; it does serve to link the referer with GET request in final output.
 		strSecondary[MULTI2MAC_ATIME]		= strTime;
 		//strSecondary[MULTI2MAC_MTIME]	= 
 		//strSecondary[MULTI2MAC_CTIME]	= 
-		//strSecondary[MULTI2MAC_CRTIME]	= 
+		//strSecondary[MULTI2MAC_BTIME]	= 
 	}
 }
 

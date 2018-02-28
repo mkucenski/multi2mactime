@@ -15,9 +15,6 @@
 #ifndef MULTI2MACTIME_PROCESSOR_H_
 #define MULTI2MACTIME_PROCESSOR_H_
 
-//#define _DEBUG_
-#include "misc/debugMsgs.h"
-
 #include <string>
 using namespace std;
 
@@ -29,6 +26,11 @@ using namespace std;
 //MD5		|NAME		|INODE	|PERMS	|UID	|GID	|SIZE	|ATIME	|MTIME	|CTIME	|CRTIME
 //multi2mactime
 //HASH	|DETAIL	|TYPE		|LOG-SRC	|FROM	|TO	|SIZE	|ATIME	|MTIME	|CTIME	|CRTIME
+//
+//MODIFIED = file content changed
+//ACCESSED
+//CHANGED = file meta (MFT) data changed
+//CREATED
 
 #define MULTI2MAC_HASH		TSK3_MACTIME_MD5
 #define MULTI2MAC_DETAIL	TSK3_MACTIME_NAME
@@ -40,7 +42,9 @@ using namespace std;
 #define MULTI2MAC_ATIME		TSK3_MACTIME_ATIME
 #define MULTI2MAC_MTIME		TSK3_MACTIME_MTIME
 #define MULTI2MAC_CTIME		TSK3_MACTIME_CTIME
-#define MULTI2MAC_CRTIME	TSK3_MACTIME_CRTIME
+#define MULTI2MAC_BTIME		TSK3_MACTIME_CRTIME
+
+void processIEF(string* pstrData, string* pstrHeader, string* pstrFilename, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields, string* strSecondary);
 
 void processGriffeyeCSV(string* pstrData, string* pstrHeader, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields);
 void processHirsch(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields);
@@ -52,6 +56,10 @@ void processCustomFSBT(string* pstrData, u_int32_t uiSkew, bool bNormalize, time
 void processSymantec(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields);
 void processJuniper(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields);
 void processPIX(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields);
+
+int32_t getUnix32FromStrings(string strMonth, string strDay, string strYear, string strHour, string strMinute, string strSecond, u_int32_t uiSkew, timeZoneCalculator* pTZCalc);
+int32_t getUnix32DateTimeFromString(string strDateTime, char chSeparator, char chDateDelim, char chTimeDelim, u_int32_t uiSkew, timeZoneCalculator* pTZCalc);
+int32_t getUnix32DateTimeFromString2(string strDateTime, char chSeparator, char chDateDelim, char chTimeDelim, u_int32_t uiSkew, timeZoneCalculator* pTZCalc);
 
 #endif /*MULTI2MACTIME_PROCESSOR_H_*/
 

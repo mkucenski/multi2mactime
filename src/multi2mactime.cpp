@@ -12,15 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//#define _DEBUG_
+#define _DEBUG_
 #include "misc/debugMsgs.h"
+#include "misc/errMsgs.h"
 
 #include <string>
 #include <vector>
+#include <algorithm>
 using namespace std;
 
 #include "popt.h"
 #include "misc/poptUtils.h"
+#include "misc/errMsgs.h"
 #include "processor.h"
 
 #include "libtimeUtils/src/timeZoneCalculator.h"
@@ -39,13 +42,15 @@ int main(int argc, const char** argv) {
 	u_int32_t uiSkew = 0;
 	bool bNormalize = false;
 	bool bHTMLDecode = false;
+	string strLog;
 
 	struct poptOption optionsTable[] = {
-		{"type",	't',	POPT_ARG_STRING,	NULL,	10,	"Format for data.", "type"},
+		{"type",			't',	POPT_ARG_STRING,	NULL,	10,	"Format for data.", "type"},
 		{"year",			'y',	POPT_ARG_INT,		NULL,	20,	"Some logs do not store the year in each entry.  Defaults to the current year.",	"year"},
 		{"timezone", 	'z',	POPT_ARG_STRING,	NULL,	30,	"POSIX timezone string (e.g. 'EST-5EDT,M4.1.0,M10.1.0' or 'GMT-5') indicating which zone the logs are using. Defaults to GMT.", "zone"},
 		{"skew",			's',	POPT_ARG_INT,		NULL,	40,	"Adjust time values by given seconds.", "seconds"},
 		{"normalize",	'n',	POPT_ARG_NONE,		NULL,	50,	"Attempt to clean/normalize input data based on known issues with various types of data. Use w/CAUTION and check stderr for results!"},
+		{"log",			'l',	POPT_ARG_STRING,	NULL,	55,	"Log errors/warnings to file.", "log"},
 		//{"html-decode",'h',	POPT_ARG_NONE,		NULL, 60, 	"Execute multipass decoding of HTML encoded strings. Provides easier readability of URLs w/in URLs."},
 		{"custom1",		 0,	POPT_ARG_STRING,	NULL,	70,	"Custom value applicable to certain types of data.", "custom1"},
 		{"custom2",		 0,	POPT_ARG_STRING,	NULL,	80,	"Custom value applicable to certain types of data.", "custom2"},
@@ -83,6 +88,10 @@ int main(int argc, const char** argv) {
 				break;
 			case 50:
 				bNormalize = true;
+				break;
+			case 55:
+				strLog = poptGetOptArg(optCon);
+				logOpen(strLog);
 				break;
 			case 60:
 				bHTMLDecode = true;
@@ -123,18 +132,23 @@ int main(int argc, const char** argv) {
 			string strFields[11];
 			string strSecondary[11];
 
-			string strHeader = txtFileObj.getFirstRow();
+			// For these types, we know there is a leading header row and we use that row to figure out what should be read.
+			string strHeader;
+			if (strType == "griffeye" || strType == "ief") {
+				strHeader = txtFileObj.getNextRow();
+			}	  
 
 			while (txtFileObj.getNextRow(&strData)) {
+
 				if (strType == "squidw3c") {
 	 				processSquidW3c(&strData, uiYear, uiSkew, bNormalize, &tzcalc, strFields, strSecondary);
 				} else if (strType == "symantec") {
 	 				processSymantec(&strData, uiYear, uiSkew, bNormalize, &tzcalc, strFields);
 				} else if (strType == "ipfw") {
-					strFields[MULTI2MAC_LOG] = "----ipfw";
+					strFields[MULTI2MAC_LOG] = "--------ipfw";
 					strFields[MULTI2MAC_DETAIL] = "Not Yet Implemented";
 				} else if (strType == "pf") {
-					strFields[MULTI2MAC_LOG] = "------pf";
+					strFields[MULTI2MAC_LOG] = "----------pf";
 					strFields[MULTI2MAC_DETAIL] = "Not Yet Implemented";
 				} else if (strType == "pix") {
 					processPIX(&strData, uiSkew, bNormalize, &tzcalc, strFields);
@@ -152,43 +166,71 @@ int main(int argc, const char** argv) {
 					processHirsch(&strData, uiSkew, bNormalize, &tzcalc, strFields);
 				} else if (strType == "griffeye") {
 					processGriffeyeCSV(&strData, &strHeader, uiSkew, bNormalize, &tzcalc, strFields);
+				} else if (strType == "ief") {
+					processIEF(&strData, &strHeader, &*it, uiSkew, bNormalize, &tzcalc, strFields, strSecondary);
 				} else {
-					strFields[MULTI2MAC_LOG] = "-unknown";
+					strFields[MULTI2MAC_LOG] = "-----unknown";
 					strFields[MULTI2MAC_DETAIL] = "Unknown Type";
 				}
 
-				// Output final mactime format
-				cout 					<< strFields[MULTI2MAC_HASH]		<< "|"
-										<< strFields[MULTI2MAC_DETAIL]	<< "|"
-										<< strFields[MULTI2MAC_TYPE]		<< "|"
-						<< "log-"	<< strFields[MULTI2MAC_LOG]		<< "|"
-										<< strFields[MULTI2MAC_FROM]		<< "|"
-										<< strFields[MULTI2MAC_TO]			<< "|"
-										<< strFields[MULTI2MAC_SIZE]		<< "|"
-										<< strFields[MULTI2MAC_ATIME]		<< "|"
-										<< strFields[MULTI2MAC_MTIME]		<< "|"
-										<< strFields[MULTI2MAC_CTIME]		<< "|"
-										<< strFields[MULTI2MAC_CRTIME]	<< "\n";
+				//Without any time values, it doesn't make sense to output the data.
+				if (strFields[MULTI2MAC_ATIME] != "" || strFields[MULTI2MAC_MTIME] != "" || strFields[MULTI2MAC_CTIME] != "" || strFields[MULTI2MAC_BTIME] != "") {
 
-				// If secondary records created, output them in mactime format also
-				if (strSecondary[MULTI2MAC_DETAIL] != "") {
-					cout 					<< strSecondary[MULTI2MAC_HASH]		<< "|"
+					// Do some rudimentary cleanup on the data; since '|' is a field delimiter, it cannot be in the final output.
+					replace(strFields[MULTI2MAC_HASH].begin(), strFields[MULTI2MAC_HASH].end(), '|', '-');
+					replace(strFields[MULTI2MAC_DETAIL].begin(), strFields[MULTI2MAC_DETAIL].end(), '|', '-');
+					replace(strFields[MULTI2MAC_TYPE].begin(), strFields[MULTI2MAC_TYPE].end(), '|', '-');
+					replace(strFields[MULTI2MAC_LOG].begin(), strFields[MULTI2MAC_LOG].end(), '|', '-');
+					replace(strFields[MULTI2MAC_FROM].begin(), strFields[MULTI2MAC_FROM].end(), '|', '-');
+					replace(strFields[MULTI2MAC_TO].begin(), strFields[MULTI2MAC_TO].end(), '|', '-');
+	
+					// Output final mactime format
+					cout 					<< strFields[MULTI2MAC_HASH]		<< "|"
+											<< strFields[MULTI2MAC_DETAIL]	<< "|"
+											<< strFields[MULTI2MAC_TYPE]		<< "|"
+											<< strFields[MULTI2MAC_LOG]		<< "|"
+											<< strFields[MULTI2MAC_FROM]		<< "|"
+											<< strFields[MULTI2MAC_TO]			<< "|"
+											<< strFields[MULTI2MAC_SIZE]		<< "|"
+											<< strFields[MULTI2MAC_ATIME]		<< "|"
+											<< strFields[MULTI2MAC_MTIME]		<< "|"
+											<< strFields[MULTI2MAC_CTIME]		<< "|"
+											<< strFields[MULTI2MAC_BTIME]		<< "\n";
+	
+					// If secondary records created, output them in mactime format also
+					if (strSecondary[MULTI2MAC_DETAIL] != "") {
+						cout 				<< strSecondary[MULTI2MAC_HASH]		<< "|"
 											<< strSecondary[MULTI2MAC_DETAIL]	<< "|"
 											<< strSecondary[MULTI2MAC_TYPE]		<< "|"
-							<< "log-"	<< strSecondary[MULTI2MAC_LOG]		<< "|"
+											<< strSecondary[MULTI2MAC_LOG]		<< "|"
 											<< strSecondary[MULTI2MAC_FROM]		<< "|"
 											<< strSecondary[MULTI2MAC_TO]			<< "|"
 											<< strSecondary[MULTI2MAC_SIZE]		<< "|"
 											<< strSecondary[MULTI2MAC_ATIME]		<< "|"
 											<< strSecondary[MULTI2MAC_MTIME]		<< "|"
 											<< strSecondary[MULTI2MAC_CTIME]		<< "|"
-											<< strSecondary[MULTI2MAC_CRTIME]	<< "\n";
-				} //if (strSecondary[MULTI2MAC_DETAIL] != "") {
+											<< strSecondary[MULTI2MAC_BTIME]		<< "\n";
+					} // if (strSecondary[MULTI2MAC_DETAIL] != "") {
+
+				} else { 
+					WARNING(*it << ": No valid time values (" << strData << ")");
+				} // if (strFields[MULTI2MAC_ATIME] != "" || strFields[MULTI2MAC_MTIME] != "" || strFields[MULTI2MAC_CTIME] != "" || strFields[MULTI2MAC_BTIME] != "") {
+
+				// Clear out values for the next line
+				for (int i=0; i<11; i++) {
+					strFields[i] = "";
+					strSecondary[i] = "";
+				}
 			}
 		} else {
-		}
-	}	//for (vector<string>::iterator it = arguments.filenameVector.begin(); it != arguments.filenameVector.end(); it++) {
+			ERROR(*it << ": Unable to open file");
+		} // if (txtFileObj.open(*it)) { 
+	}	// for (vector<string>::iterator it = arguments.filenameVector.begin(); it != arguments.filenameVector.end(); it++) {
+
+	if (strLog != "") {
+		logClose();
+	}
 
 	exit(rv);	
-}	//int main(int argc, const char** argv) {
+}	// int main(int argc, const char** argv) {
 

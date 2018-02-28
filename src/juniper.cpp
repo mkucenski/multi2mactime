@@ -14,6 +14,7 @@
 
 //#define _DEBUG_
 #include "misc/debugMsgs.h"
+#include "misc/errMsgs.h"
 
 #include "processor.h"
 
@@ -58,13 +59,13 @@ void processJuniper(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZon
 	//Output Values
 	strFields[MULTI2MAC_DETAIL]	= strMsg;
 	strFields[MULTI2MAC_TYPE]		= strMsgType + ":" + strService;
-	strFields[MULTI2MAC_LOG]		= "-juniper";
+	strFields[MULTI2MAC_LOG]		= "-----juniper";
 	strFields[MULTI2MAC_FROM]		= strSrc;
 	strFields[MULTI2MAC_TO]			= strDst;
 	strFields[MULTI2MAC_SIZE]		= strBytes;
 	strFields[MULTI2MAC_ATIME]		= (timeVal > 0 ? boost_lexical_cast_wrapper<string>(timeVal) : "");
 	//strFields[MULTI2MAC_MTIME]	= 
 	//strFields[MULTI2MAC_CTIME]	= 
-	//strFields[MULTI2MAC_CRTIME]	= 
+	//strFields[MULTI2MAC_BTIME]	= 
 }
 

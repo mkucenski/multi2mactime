@@ -14,6 +14,7 @@
 
 //#define _DEBUG_
 #include "misc/debugMsgs.h"
+#include "misc/errMsgs.h"
 
 #include "processor.h"
 
@@ -27,7 +28,7 @@ using namespace std;
 #include "misc/boost_lexical_cast_wrapper.hpp"
 
 void processHirsch(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
-	DEBUG_INFO(PACKAGE << ":processHirsch()");
+	DEBUG("processHirsch()");
 	//"	   Host Date/Time BETWEEN '2017-08-23 00:00:00' AND '2017-08-25 23:59:59'   ","<SITE>","All Events Log By Date","Print Time:","8/30/2017","12:07:07PM","Printed by:","<USER>","Sequence ID","Host Date/Time","Controller Date/Time","Description","Event ID","Address",285061,"8/25/2017  11:59:59PM","8/26/2017  12:00:00AM","Updating temporary users",8010,"\\XNET.001.0004.001.01","Page -1 of 1"
 	//"	   Host Date/Time BETWEEN '2017-08-23 00:00:00' AND '2017-08-25 23:59:59'   "
 	
@@ -62,7 +63,7 @@ void processHirsch(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZone
 
 		int32_t timeVal = -1; 
 		if (strDate.length() && strTime.length()) {
-			DEBUG_INFO(	strDate << " " << strTime << "\n" <<
+			DEBUG(	strDate << " " << strTime << "\n" <<
 							" month:"	<< boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(0)) <<
 							" day:"		<< boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(1)) <<
 							" year:"		<< boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(2)) <<
@@ -89,7 +90,7 @@ void processHirsch(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZone
 				local_time::local_date_time ldt = pTZCalc->createLocalTime(uiMonth, uiDay, uiYear, uiHour, uiMin, uiSec) + posix_time::seconds(uiSkew);
 				timeVal = getUnix32FromLocalTime(ldt);
 			} else {
-					  DEBUG_INFO("whoops");
+					  DEBUG("whoops");
 				//ERROR
 			} //if (	(1 <= uiMonth && uiMonth <= 12) &&
 		}
@@ -108,14 +109,14 @@ void processHirsch(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZone
 	//Output Values
 	strFields[MULTI2MAC_DETAIL]	= strURL;
 	strFields[MULTI2MAC_TYPE]		= strService;
-	strFields[MULTI2MAC_LOG]		= "fortg1k5";
+	strFields[MULTI2MAC_LOG]		= "----fortg1k5";
 	strFields[MULTI2MAC_FROM]		= strSrc;
 	strFields[MULTI2MAC_TO]			= strDst;
 	//strFields[MULTI2MAC_SIZE]	= 
 	strFields[MULTI2MAC_ATIME]		= strTime;
 	//strFields[MULTI2MAC_MTIME]	= 
 	//strFields[MULTI2MAC_CTIME]	= 
-	//strFields[MULTI2MAC_CRTIME]	= 
+	//strFields[MULTI2MAC_BTIME]	= 
 	*/
 }
 
