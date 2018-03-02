@@ -33,7 +33,7 @@ void processPIX(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCal
 	if (uiPIXPos > 0) {
 		string strTime = string(*pstrData, uiPIXPos - 22, 20);  //Find "%PIX" and then backup 22 characters to get the PIX generated time, not the receiving syslog time
 		if (strTime.length()) {
-			local_time::local_date_time ldt = pTZCalc->createLocalTime(strTime, "%b %d %Y %H:%M:%S") + posix_time::seconds(uiSkew);
+				  boost::local_time::local_date_time ldt = pTZCalc->createLocalTime(strTime, "%b %d %Y %H:%M:%S") + boost::posix_time::seconds(uiSkew);
 			timeVal = getUnix32FromLocalTime(ldt);
 		}
 	}

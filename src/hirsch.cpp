@@ -87,7 +87,7 @@ void processHirsch(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZone
 					(0 <= uiHour && uiHour <= 23) &&
 					(0 <= uiMin && uiMin <= 60) &&
 					(0 <= uiSec && uiSec <= 60)) {
-				local_time::local_date_time ldt = pTZCalc->createLocalTime(uiMonth, uiDay, uiYear, uiHour, uiMin, uiSec) + posix_time::seconds(uiSkew);
+					  boost::local_time::local_date_time ldt = pTZCalc->createLocalTime(uiMonth, uiDay, uiYear, uiHour, uiMin, uiSec) + boost::posix_time::seconds(uiSkew);
 				timeVal = getUnix32FromLocalTime(ldt);
 			} else {
 					  DEBUG("whoops");

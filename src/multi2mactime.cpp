@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define _DEBUG_
+// #define _DEBUG_
 #include "misc/debugMsgs.h"
 #include "misc/errMsgs.h"
 
@@ -37,7 +37,7 @@ int main(int argc, const char** argv) {
 	string strType = "";
 	string strCustom1 = "";
 	string strCustom2 = "";
-	u_int16_t uiYear = posix_time::second_clock::local_time().date().year();
+	u_int16_t uiYear = boost::posix_time::second_clock::local_time().date().year();
 	timeZoneCalculator tzcalc;
 	u_int32_t uiSkew = 0;
 	bool bNormalize = false;
@@ -66,7 +66,6 @@ int main(int argc, const char** argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	string strTmp;
 	int iOption = poptGetNextOpt(optCon);
 	while (iOption >= 0) {
 		switch (iOption) {

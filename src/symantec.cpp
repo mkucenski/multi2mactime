@@ -30,7 +30,7 @@ using namespace std;
 void processSymantec(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
 	DEBUG("processSymantec()");
 
-	local_time::local_date_time ldt = pTZCalc->createLocalTime(boost_lexical_cast_wrapper<string>(uiYear) + " " + string(*pstrData, 0, 19), "%Y %b %d %H:%M:%S%F") + posix_time::seconds(uiSkew);
+	boost::local_time::local_date_time ldt = pTZCalc->createLocalTime(boost_lexical_cast_wrapper<string>(uiYear) + " " + string(*pstrData, 0, 19), "%Y %b %d %H:%M:%S%F") + boost::posix_time::seconds(uiSkew);
 	int32_t timeVal = getUnix32FromLocalTime(ldt);
 	
 	string strMsgType = findSubString(*pstrData, 23, "", ": ");

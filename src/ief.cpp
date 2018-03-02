@@ -28,7 +28,7 @@ using namespace std;
 #include "libdelimText/src/delimTextRow.h"
 #include "misc/boost_lexical_cast_wrapper.hpp"
 
-int32_t getIEFTime(u_int32_t idArtifactFieldCode, u_int32_t uiSkew, timeZoneCalculator* pTZCalc, delimTextRow* p_delimText, delimTextRow* p_delimHeader); 
+int32_t getIEFTime(string strTime, u_int32_t idArtifact, u_int32_t uiSkew, timeZoneCalculator* pTZCalc); 
 
 void processIEF(string* pstrData, string* pstrHeader, string* pstrFilename, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields, string* strSecondary) {
 	DEBUG(*pstrFilename << ": processIEF(pstrData = '" << *pstrData << "')");
@@ -36,16 +36,32 @@ void processIEF(string* pstrData, string* pstrHeader, string* pstrFilename, u_in
 	delimTextRow delimText(*pstrData, ',', '"');
 	delimTextRow delimHeader(*pstrHeader, ',', '"');
 
-	// Strip the filename of .xlsx and/or .csv to get down to just the overall artifact name
+	// TODO	This is far too quick and dirty...
+	// 		Strip the filename of .xlsx and/or .csv to get down to just the overall artifact name
 	string strFilename = ieraseSubString(*pstrFilename, ".xlsx");
 	strFilename = ieraseSubString(strFilename, ".csv");
 	
 	u_int32_t idArtifact = getCode(strFilename, IEF_ARTIFACTS, sizeof(IEF_ARTIFACTS));
 	if (idArtifact > 0) {
-		int32_t dtmBTime = getIEFTime(idArtifact + IEF_PRIMARY + IEF_BTIME, uiSkew, pTZCalc, &delimText, &delimHeader);
-		int32_t dtmATime = getIEFTime(idArtifact + IEF_PRIMARY + IEF_ATIME, uiSkew, pTZCalc, &delimText, &delimHeader);
-		int32_t dtmMTime = getIEFTime(idArtifact + IEF_PRIMARY + IEF_MTIME, uiSkew, pTZCalc, &delimText, &delimHeader);
-		int32_t dtmCTime = getIEFTime(idArtifact + IEF_PRIMARY + IEF_CTIME, uiSkew, pTZCalc, &delimText, &delimHeader);
+		int iBTimeColumn = delimHeader.getColumnByValue(getMessage(idArtifact + IEF_PRIMARY + IEF_BTIME, IEF_ARTIFACT_FIELDS, sizeof(IEF_ARTIFACT_FIELDS)));
+		int iATimeColumn = delimHeader.getColumnByValue(getMessage(idArtifact + IEF_PRIMARY + IEF_ATIME, IEF_ARTIFACT_FIELDS, sizeof(IEF_ARTIFACT_FIELDS)));
+		int iMTimeColumn = delimHeader.getColumnByValue(getMessage(idArtifact + IEF_PRIMARY + IEF_MTIME, IEF_ARTIFACT_FIELDS, sizeof(IEF_ARTIFACT_FIELDS)));
+		int iCTimeColumn = delimHeader.getColumnByValue(getMessage(idArtifact + IEF_PRIMARY + IEF_CTIME, IEF_ARTIFACT_FIELDS, sizeof(IEF_ARTIFACT_FIELDS)));
+
+		string strBTime = delimText.getValue(iBTimeColumn);
+		string strATime = delimText.getValue(iATimeColumn);
+		string strMTime = delimText.getValue(iMTimeColumn);
+		string strCTime = delimText.getValue(iCTimeColumn);
+
+		DEBUG("processIEF() PRIMARY: " <<	"strBTime(" << strBTime << ")(" << iBTimeColumn << ") " <<
+							 							"strATime(" << strATime << ")(" << iATimeColumn << ") " <<
+														"strMTime(" << strMTime << ")(" << iMTimeColumn << ") " <<
+														"strCTime(" << strCTime << ")(" << iCTimeColumn << ")");
+
+		int32_t dtmBTime = getIEFTime(strBTime, idArtifact, uiSkew, pTZCalc);
+		int32_t dtmATime = getIEFTime(strATime, idArtifact, uiSkew, pTZCalc);
+		int32_t dtmMTime = getIEFTime(strMTime, idArtifact, uiSkew, pTZCalc);
+		int32_t dtmCTime = getIEFTime(strCTime, idArtifact, uiSkew, pTZCalc);
 		
 		// There needs to be at least one valid time value before anything else makes sense.
 		if (dtmBTime > 0 || dtmATime > 0 || dtmMTime > 0 || dtmCTime > 0) {
@@ -69,10 +85,26 @@ void processIEF(string* pstrData, string* pstrHeader, string* pstrFilename, u_in
 			strFields[MULTI2MAC_BTIME]		= (dtmBTime > 0 ? boost_lexical_cast_wrapper<string>(dtmBTime) : "");
 
 			//Secondary entries within a single line
-			dtmBTime = getIEFTime(idArtifact + IEF_SECONDARY + IEF_BTIME, uiSkew, pTZCalc, &delimText, &delimHeader);
-			dtmATime = getIEFTime(idArtifact + IEF_SECONDARY + IEF_ATIME, uiSkew, pTZCalc, &delimText, &delimHeader);
-			dtmMTime = getIEFTime(idArtifact + IEF_SECONDARY + IEF_MTIME, uiSkew, pTZCalc, &delimText, &delimHeader);
-			dtmCTime = getIEFTime(idArtifact + IEF_SECONDARY + IEF_CTIME, uiSkew, pTZCalc, &delimText, &delimHeader);
+			iBTimeColumn = delimHeader.getColumnByValue(getMessage(idArtifact + IEF_SECONDARY + IEF_BTIME, IEF_ARTIFACT_FIELDS, sizeof(IEF_ARTIFACT_FIELDS)));
+			iATimeColumn = delimHeader.getColumnByValue(getMessage(idArtifact + IEF_SECONDARY + IEF_ATIME, IEF_ARTIFACT_FIELDS, sizeof(IEF_ARTIFACT_FIELDS)));
+			iMTimeColumn = delimHeader.getColumnByValue(getMessage(idArtifact + IEF_SECONDARY + IEF_MTIME, IEF_ARTIFACT_FIELDS, sizeof(IEF_ARTIFACT_FIELDS)));
+			iCTimeColumn = delimHeader.getColumnByValue(getMessage(idArtifact + IEF_SECONDARY + IEF_CTIME, IEF_ARTIFACT_FIELDS, sizeof(IEF_ARTIFACT_FIELDS)));
+
+			strBTime = delimText.getValue(iBTimeColumn);
+			strATime = delimText.getValue(iATimeColumn);
+			strMTime = delimText.getValue(iMTimeColumn);
+			strCTime = delimText.getValue(iCTimeColumn);
+
+			DEBUG("processIEF() SECONDARY: " <<	"strBTime(" << strBTime << ")(" << iBTimeColumn << ") " <<
+								 							"strATime(" << strATime << ")(" << iATimeColumn << ") " <<
+															"strMTime(" << strMTime << ")(" << iMTimeColumn << ") " <<
+															"strCTime(" << strCTime << ")(" << iCTimeColumn << ")");
+
+			dtmBTime = getIEFTime(strBTime, idArtifact, uiSkew, pTZCalc);
+			dtmATime = getIEFTime(strATime, idArtifact, uiSkew, pTZCalc);
+			dtmMTime = getIEFTime(strMTime, idArtifact, uiSkew, pTZCalc);
+			dtmCTime = getIEFTime(strCTime, idArtifact, uiSkew, pTZCalc);
+		
 			if (dtmBTime > 0 || dtmATime > 0 || dtmMTime > 0 || dtmCTime > 0) {
 				strDetails = delimText.getValue(delimHeader.getColumnByValue(getMessage(idArtifact + IEF_SECONDARY+ IEF_DETAIL, IEF_ARTIFACT_FIELDS, sizeof(IEF_ARTIFACT_FIELDS))));
 				strDetail2 = delimText.getValue(delimHeader.getColumnByValue(getMessage(idArtifact + IEF_SECONDARY + IEF_DETAIL2, IEF_ARTIFACT_FIELDS, sizeof(IEF_ARTIFACT_FIELDS))));
@@ -100,24 +132,18 @@ void processIEF(string* pstrData, string* pstrHeader, string* pstrFilename, u_in
 	}
 }
 
-int32_t getIEFTime(u_int32_t idArtifactFieldCode, u_int32_t uiSkew, timeZoneCalculator* pTZCalc, delimTextRow* p_delimText, delimTextRow* p_delimHeader) {
-	int32_t dtmTime = 0;
+int32_t getIEFTime(string strTime, u_int32_t idArtifact, u_int32_t uiSkew, timeZoneCalculator* pTZCalc) {
+	int32_t dtmTime = -1;
 
-	DEBUG("getIEFTime() idArtifactFieldCode = " << idArtifactFieldCode << "(" << (idArtifactFieldCode & IEF_ARTIFACT_MASK) << ")");
-	string strTime = p_delimText->getValue(p_delimHeader->getColumnByValue(getMessage(idArtifactFieldCode, IEF_ARTIFACT_FIELDS, sizeof(IEF_ARTIFACT_FIELDS))));
 	if (!strTime.empty()) {
-		if ((idArtifactFieldCode & IEF_ARTIFACT_MASK) == IEF_ARTIFACT_INTERNET_EXPLORER_10_11_DAILY_WEEKLY_HISTORY) {
-			DEBUG("getIEFTime() This should only get called while processing IEF_ARTIFACT_INTERNET_EXPLORER_10_11_DAILY_WEEKLY_HISTORY.");
+		if (idArtifact == IEF_ARTIFACT_INTERNET_EXPLORER_10_11_DAILY_WEEKLY_HISTORY) {
 			dtmTime = getUnix32DateTimeFromString2(strTime, ' ', '-', ':', uiSkew, pTZCalc);
 		} else {
 			dtmTime = getUnix32DateTimeFromString(strTime, ' ', '/', ':', uiSkew, pTZCalc);
 		}
 		if (dtmTime <= 0) {
 			ERROR("getIEFTime() Failed to convert non-empty string to time value (" << strTime << ")");
-			dtmTime = -1;
 		}
-	} else {
-		DEBUG("getIEFTime() strTime empty (" << p_delimText->getData() << ")");
 	}
 
 	return dtmTime;

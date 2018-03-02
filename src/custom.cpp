@@ -65,7 +65,7 @@ void processCustomVPN_S1(string* pstrData, u_int32_t uiSkew, bool bNormalize, ti
 					(0 <= uiHour && uiHour <= 23) &&
 					(0 <= uiMin && uiMin <= 60) &&
 					(0 <= uiSec && uiSec <= 60)) {
-				local_time::local_date_time ldt = pTZCalc->createLocalTime(uiMonth, uiDay, uiYear, uiHour, uiMin, uiSec) + posix_time::seconds(uiSkew);
+					  boost::local_time::local_date_time ldt = pTZCalc->createLocalTime(uiMonth, uiDay, uiYear, uiHour, uiMin, uiSec) + boost::posix_time::seconds(uiSkew);
 				timeVal = getUnix32FromLocalTime(ldt);
 			} else {
 					  DEBUG("whoops");
@@ -112,13 +112,13 @@ void processCustomFSEM(string* pstrData, u_int32_t uiSkew, bool bNormalize, time
 				uiHour = 0;
 			}
 		}
-		local_time::local_date_time ldt = pTZCalc->createLocalTime(	boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(0)),	//month
+		boost::local_time::local_date_time ldt = pTZCalc->createLocalTime(	boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(0)),	//month
 							 															boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(1)),	//day
 																						boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(2)),	//year
 																						uiHour, 																			//hour
 																						boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(1)),	//minute
 																						boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(2)))	//second
-																						+ posix_time::seconds(uiSkew);
+																						+ boost::posix_time::seconds(uiSkew);
 		timeVal = getUnix32FromLocalTime(ldt);
 	}
 
@@ -165,13 +165,13 @@ void processCustomFSBT(string* pstrData, u_int32_t uiSkew, bool bNormalize, time
 				uiHour = 0;
 			}
 		}
-		local_time::local_date_time ldt = pTZCalc->createLocalTime(	boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(0)),	//month
+		boost::local_time::local_date_time ldt = pTZCalc->createLocalTime(	boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(0)),	//month
 							 															boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(1)),	//day
 																						boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(2)),	//year
 																						uiHour, 																			//hour
 																						boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(1)),	//minute
 																						boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(2)))	//second
-																						+ posix_time::seconds(uiSkew);
+																						+ boost::posix_time::seconds(uiSkew);
 		timeVal = getUnix32FromLocalTime(ldt);
 	}
 

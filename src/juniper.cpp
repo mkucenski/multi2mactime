@@ -31,7 +31,7 @@ void processJuniper(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZon
 	int32_t timeVal = -1; 
 	string strTime = findSubString(*pstrData, 34, "start_time=\"", "\" ");
 	if (strTime.length()) {
-		local_time::local_date_time ldt = pTZCalc->createLocalTime(strTime, "%Y-%m-%d %H:%M:%S") + posix_time::seconds(uiSkew);
+			  boost::local_time::local_date_time ldt = pTZCalc->createLocalTime(strTime, "%Y-%m-%d %H:%M:%S") + boost::posix_time::seconds(uiSkew);
 		timeVal = getUnix32FromLocalTime(ldt);
 	}
 	string strMsg = findSubString(*pstrData, 34, "[", "");

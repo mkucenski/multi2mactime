@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define _DEBUG_
+// #define _DEBUG_
 #include "misc/debugMsgs.h"
 #include "misc/errMsgs.h"
 
@@ -83,13 +83,13 @@ int32_t getUnix32FromStrings(string strMonth, string strDay, string strYear, str
 	int32_t rv = -1;
 
 	try {
-		local_time::local_date_time ldt = pTZCalc->createLocalTime(	boost_lexical_cast_wrapper<u_int16_t>(strMonth),
+			  boost::local_time::local_date_time ldt = pTZCalc->createLocalTime(	boost_lexical_cast_wrapper<u_int16_t>(strMonth),
 							 															boost_lexical_cast_wrapper<u_int16_t>(strDay),
 																						boost_lexical_cast_wrapper<u_int16_t>(strYear),
 																						boost_lexical_cast_wrapper<u_int16_t>(strHour),
 																						boost_lexical_cast_wrapper<u_int16_t>(strMinute),
 																						boost_lexical_cast_wrapper<u_int16_t>(strSecond))
-																						+ posix_time::seconds(uiSkew);
+																						+ boost::posix_time::seconds(uiSkew);
 		rv = getUnix32FromLocalTime(ldt);
 	} catch (...) {
 		ERROR("getUnix32FromStrings() Caught exception converting string (" << strMonth << "-" << strDay << "-" << strYear << " " << strHour << ":" << strMinute << ":" << strSecond << ")");
