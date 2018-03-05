@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//#define _DEBUG_
+// #define _DEBUG_
 #include "misc/debugMsgs.h"
 #include "misc/errMsgs.h"
 
@@ -31,8 +31,12 @@ void processJuniper(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZon
 	int32_t timeVal = -1; 
 	string strTime = findSubString(*pstrData, 34, "start_time=\"", "\" ");
 	if (strTime.length()) {
-			  boost::local_time::local_date_time ldt = pTZCalc->createLocalTime(strTime, "%Y-%m-%d %H:%M:%S") + boost::posix_time::seconds(uiSkew);
-		timeVal = getUnix32FromLocalTime(ldt);
+			  boost::local_time::local_date_time ldt(boost::local_time::not_a_date_time);
+			  if (pTZCalc->createLocalTime(strTime, "%Y-%m-%d %H:%M:%S", &ldt)) {
+					timeVal = getUnix32FromLocalTime(ldt + boost::posix_time::seconds(uiSkew));
+			  } else {
+					ERROR("processJuniper() Unable to createLocalTime()");
+			  }
 	}
 	string strMsg = findSubString(*pstrData, 34, "[", "");
 	string strMsgType = findSubString(strMsg, 34, "]", ": ");

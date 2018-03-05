@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#define _DEBUG_
+// #define _DEBUG_
 #include "misc/debugMsgs.h"
 #include "misc/errMsgs.h"
 
@@ -27,6 +27,10 @@ using namespace std;
 #include "libdelimText/src/textUtils.h"
 #include "libdelimText/src/delimTextRow.h"
 #include "misc/boost_lexical_cast_wrapper.hpp"
+
+// TODO
+// * seems to be errors in LNK files and PDF files with finding valid dates that appear to be present.
+// * 
 
 int32_t getIEFTime(string strTime, u_int32_t idArtifact, u_int32_t uiSkew, timeZoneCalculator* pTZCalc); 
 

@@ -83,17 +83,22 @@ int32_t getUnix32FromStrings(string strMonth, string strDay, string strYear, str
 	int32_t rv = -1;
 
 	try {
-			  boost::local_time::local_date_time ldt = pTZCalc->createLocalTime(	boost_lexical_cast_wrapper<u_int16_t>(strMonth),
-							 															boost_lexical_cast_wrapper<u_int16_t>(strDay),
-																						boost_lexical_cast_wrapper<u_int16_t>(strYear),
-																						boost_lexical_cast_wrapper<u_int16_t>(strHour),
-																						boost_lexical_cast_wrapper<u_int16_t>(strMinute),
-																						boost_lexical_cast_wrapper<u_int16_t>(strSecond))
-																						+ boost::posix_time::seconds(uiSkew);
-		rv = getUnix32FromLocalTime(ldt);
+		boost::local_time::local_date_time ldt(boost::local_time::not_a_date_time);
+		if (pTZCalc->createLocalTime(	boost_lexical_cast_wrapper<u_int16_t>(strMonth),
+							 					boost_lexical_cast_wrapper<u_int16_t>(strDay),
+												boost_lexical_cast_wrapper<u_int16_t>(strYear),
+												boost_lexical_cast_wrapper<u_int16_t>(strHour),
+												boost_lexical_cast_wrapper<u_int16_t>(strMinute),
+												boost_lexical_cast_wrapper<u_int16_t>(strSecond),
+												&ldt)) {
+			rv = getUnix32FromLocalTime(ldt + boost::posix_time::seconds(uiSkew));
+		} else {
+			ERROR("getUnix32FromStrings() Unable to createLocalTime(" << strMonth << "-" << strDay << "-" << strYear << " " << strHour << ":" << strMinute << ":" << strSecond << ")");
+		}
 	} catch (...) {
 		ERROR("getUnix32FromStrings() Caught exception converting string (" << strMonth << "-" << strDay << "-" << strYear << " " << strHour << ":" << strMinute << ":" << strSecond << ")");
 	}
+
 	return rv;
 }
 

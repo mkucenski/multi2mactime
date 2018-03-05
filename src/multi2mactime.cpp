@@ -135,9 +135,11 @@ int main(int argc, const char** argv) {
 			string strHeader;
 			if (strType == "griffeye" || strType == "ief") {
 				strHeader = txtFileObj.getNextRow();
+				DEBUG("strHeader: " << strHeader);
 			}	  
 
 			while (txtFileObj.getNextRow(&strData)) {
+				DEBUG("strData: " << strData);
 
 				if (strType == "squidw3c") {
 	 				processSquidW3c(&strData, uiYear, uiSkew, bNormalize, &tzcalc, strFields, strSecondary);
@@ -172,48 +174,41 @@ int main(int argc, const char** argv) {
 					strFields[MULTI2MAC_DETAIL] = "Unknown Type";
 				}
 
-				//Without any time values, it doesn't make sense to output the data.
-				if (strFields[MULTI2MAC_ATIME] != "" || strFields[MULTI2MAC_MTIME] != "" || strFields[MULTI2MAC_CTIME] != "" || strFields[MULTI2MAC_BTIME] != "") {
-
-					// Do some rudimentary cleanup on the data; since '|' is a field delimiter, it cannot be in the final output.
-					replace(strFields[MULTI2MAC_HASH].begin(), strFields[MULTI2MAC_HASH].end(), '|', '-');
-					replace(strFields[MULTI2MAC_DETAIL].begin(), strFields[MULTI2MAC_DETAIL].end(), '|', '-');
-					replace(strFields[MULTI2MAC_TYPE].begin(), strFields[MULTI2MAC_TYPE].end(), '|', '-');
-					replace(strFields[MULTI2MAC_LOG].begin(), strFields[MULTI2MAC_LOG].end(), '|', '-');
-					replace(strFields[MULTI2MAC_FROM].begin(), strFields[MULTI2MAC_FROM].end(), '|', '-');
-					replace(strFields[MULTI2MAC_TO].begin(), strFields[MULTI2MAC_TO].end(), '|', '-');
+				// Do some rudimentary cleanup on the data; since '|' is a field delimiter, it cannot be in the final output.
+				replace(strFields[MULTI2MAC_HASH].begin(), strFields[MULTI2MAC_HASH].end(), '|', '-');
+				replace(strFields[MULTI2MAC_DETAIL].begin(), strFields[MULTI2MAC_DETAIL].end(), '|', '-');
+				replace(strFields[MULTI2MAC_TYPE].begin(), strFields[MULTI2MAC_TYPE].end(), '|', '-');
+				replace(strFields[MULTI2MAC_LOG].begin(), strFields[MULTI2MAC_LOG].end(), '|', '-');
+				replace(strFields[MULTI2MAC_FROM].begin(), strFields[MULTI2MAC_FROM].end(), '|', '-');
+				replace(strFields[MULTI2MAC_TO].begin(), strFields[MULTI2MAC_TO].end(), '|', '-');
 	
-					// Output final mactime format
-					cout 					<< strFields[MULTI2MAC_HASH]		<< "|"
-											<< strFields[MULTI2MAC_DETAIL]	<< "|"
-											<< strFields[MULTI2MAC_TYPE]		<< "|"
-											<< strFields[MULTI2MAC_LOG]		<< "|"
-											<< strFields[MULTI2MAC_FROM]		<< "|"
-											<< strFields[MULTI2MAC_TO]			<< "|"
-											<< strFields[MULTI2MAC_SIZE]		<< "|"
-											<< strFields[MULTI2MAC_ATIME]		<< "|"
-											<< strFields[MULTI2MAC_MTIME]		<< "|"
-											<< strFields[MULTI2MAC_CTIME]		<< "|"
-											<< strFields[MULTI2MAC_BTIME]		<< "\n";
+				// Output final mactime format
+				cout 					<< strFields[MULTI2MAC_HASH]		<< "|"
+										<< strFields[MULTI2MAC_DETAIL]	<< "|"
+										<< strFields[MULTI2MAC_TYPE]		<< "|"
+										<< strFields[MULTI2MAC_LOG]		<< "|"
+										<< strFields[MULTI2MAC_FROM]		<< "|"
+										<< strFields[MULTI2MAC_TO]			<< "|"
+										<< strFields[MULTI2MAC_SIZE]		<< "|"
+										<< strFields[MULTI2MAC_ATIME]		<< "|"
+										<< strFields[MULTI2MAC_MTIME]		<< "|"
+										<< strFields[MULTI2MAC_CTIME]		<< "|"
+										<< strFields[MULTI2MAC_BTIME]		<< "\n";
 	
-					// If secondary records created, output them in mactime format also
-					if (strSecondary[MULTI2MAC_DETAIL] != "") {
-						cout 				<< strSecondary[MULTI2MAC_HASH]		<< "|"
-											<< strSecondary[MULTI2MAC_DETAIL]	<< "|"
-											<< strSecondary[MULTI2MAC_TYPE]		<< "|"
-											<< strSecondary[MULTI2MAC_LOG]		<< "|"
-											<< strSecondary[MULTI2MAC_FROM]		<< "|"
-											<< strSecondary[MULTI2MAC_TO]			<< "|"
-											<< strSecondary[MULTI2MAC_SIZE]		<< "|"
-											<< strSecondary[MULTI2MAC_ATIME]		<< "|"
-											<< strSecondary[MULTI2MAC_MTIME]		<< "|"
-											<< strSecondary[MULTI2MAC_CTIME]		<< "|"
-											<< strSecondary[MULTI2MAC_BTIME]		<< "\n";
-					} // if (strSecondary[MULTI2MAC_DETAIL] != "") {
-
-				} else { 
-					WARNING(*it << ": No valid time values (" << strData << ")");
-				} // if (strFields[MULTI2MAC_ATIME] != "" || strFields[MULTI2MAC_MTIME] != "" || strFields[MULTI2MAC_CTIME] != "" || strFields[MULTI2MAC_BTIME] != "") {
+				// If secondary records created, output them in mactime format also
+				if (strSecondary[MULTI2MAC_DETAIL] != "") {
+					cout 				<< strSecondary[MULTI2MAC_HASH]		<< "|"
+										<< strSecondary[MULTI2MAC_DETAIL]	<< "|"
+										<< strSecondary[MULTI2MAC_TYPE]		<< "|"
+										<< strSecondary[MULTI2MAC_LOG]		<< "|"
+										<< strSecondary[MULTI2MAC_FROM]		<< "|"
+										<< strSecondary[MULTI2MAC_TO]			<< "|"
+										<< strSecondary[MULTI2MAC_SIZE]		<< "|"
+										<< strSecondary[MULTI2MAC_ATIME]		<< "|"
+										<< strSecondary[MULTI2MAC_MTIME]		<< "|"
+										<< strSecondary[MULTI2MAC_CTIME]		<< "|"
+										<< strSecondary[MULTI2MAC_BTIME]		<< "\n";
+				} // if (strSecondary[MULTI2MAC_DETAIL] != "") {
 
 				// Clear out values for the next line
 				for (int i=0; i<11; i++) {

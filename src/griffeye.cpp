@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//#define _DEBUG_
+// #define _DEBUG_
 #include "misc/debugMsgs.h"
 #include "misc/errMsgs.h"
 
@@ -28,33 +28,36 @@ using namespace std;
 #include "misc/boost_lexical_cast_wrapper.hpp"
 
 void processGriffeyeCSV(string* pstrData, string* pstrHeader, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
-	// Record,URL,User Agent,Source,Evidence Number
-
 	DEBUG("processGriffeyeCSV()");
 
 	delimTextRow delimText(*pstrData, ',', '"');
 	delimTextRow delimHeader(*pstrHeader, ',', '"');
 
-	string strCreated = delimText.getValue(delimHeader.getColumnByValue("Created Date"));
+	string strBirthed = delimText.getValue(delimHeader.getColumnByValue("Created Date"));
 	string strAccessed = delimText.getValue(delimHeader.getColumnByValue("Last Accessed"));
 	string strModified = delimText.getValue(delimHeader.getColumnByValue("Last Write Time"));
+	DEBUG("processGriffeyeCSV() (B) " << strBirthed << "; (A) " << strAccessed << "; (M) " << strModified);
 
-	int32_t crTimeVal = getUnix32DateTimeFromString(strCreated, ' ', '/', ':', uiSkew, pTZCalc);
+	int32_t bTimeVal = getUnix32DateTimeFromString(strBirthed, ' ', '/', ':', uiSkew, pTZCalc);
 	int32_t aTimeVal = getUnix32DateTimeFromString(strAccessed, ' ', '/', ':', uiSkew, pTZCalc);
 	int32_t mTimeVal = getUnix32DateTimeFromString(strModified, ' ', '/', ':', uiSkew, pTZCalc);
 
-	//Output Values
-	strFields[MULTI2MAC_HASH]		= delimText.getValue(delimHeader.getColumnByValue("MD5"));
-	strFields[MULTI2MAC_DETAIL]	= delimText.getValue(delimHeader.getColumnByValue("Directory Path")) + "\\" + delimText.getValue(delimHeader.getColumnByValue("File Name"));
-	strFields[MULTI2MAC_TYPE]		= string("Cat") + delimText.getValue(delimHeader.getColumnByValue("Category"));
-// Last Shutdown Date/Time - (UTC) (MM/dd/yyyy)
-	strFields[MULTI2MAC_LOG]		= "----griffeye";
-	//strFields[MULTI2MAC_FROM]	= 
-	//strFields[MULTI2MAC_TO]		= 
-	strFields[MULTI2MAC_SIZE]		= delimText.getValue(delimHeader.getColumnByValue("File Size"));
-	strFields[MULTI2MAC_ATIME]		= (aTimeVal > 0 ? boost_lexical_cast_wrapper<string>(aTimeVal) : "");
-	strFields[MULTI2MAC_MTIME]		= (mTimeVal > 0 ? boost_lexical_cast_wrapper<string>(mTimeVal) : "");
-	//strFields[MULTI2MAC_CTIME]	= 
-	strFields[MULTI2MAC_BTIME]	= (crTimeVal > 0 ? boost_lexical_cast_wrapper<string>(crTimeVal) : "");
+	// There needs to be at least one valid time value before anything else makes sense.
+	if (bTimeVal > 0 || aTimeVal > 0 || mTimeVal > 0) {
+		//Output Values
+		strFields[MULTI2MAC_HASH]		= delimText.getValue(delimHeader.getColumnByValue("MD5"));
+		strFields[MULTI2MAC_DETAIL]	= stripQualifiers(delimText.getValue(delimHeader.getColumnByValue("Directory Path")), '"') + "\\" + stripQualifiers(delimText.getValue(delimHeader.getColumnByValue("File Name")), '"');
+		strFields[MULTI2MAC_TYPE]		= string("cat") + delimText.getValue(delimHeader.getColumnByValue("Category"));
+		strFields[MULTI2MAC_LOG]		= "griffeye";
+		//strFields[MULTI2MAC_FROM]	= 
+		//strFields[MULTI2MAC_TO]		= 
+		strFields[MULTI2MAC_SIZE]		= delimText.getValue(delimHeader.getColumnByValue("File Size"));
+		strFields[MULTI2MAC_ATIME]		= (aTimeVal > 0 ? boost_lexical_cast_wrapper<string>(aTimeVal) : "");
+		strFields[MULTI2MAC_MTIME]		= (mTimeVal > 0 ? boost_lexical_cast_wrapper<string>(mTimeVal) : "");
+		//strFields[MULTI2MAC_CTIME]	= 
+		strFields[MULTI2MAC_BTIME]		= (bTimeVal > 0 ? boost_lexical_cast_wrapper<string>(bTimeVal) : "");
+	} else {
+		WARNING("processGriffeyeCSV() No valid time values found (" << *pstrData << ")");
+	}
 }
 

@@ -30,8 +30,13 @@ using namespace std;
 void processSymantec(string* pstrData, u_int16_t uiYear, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields) {
 	DEBUG("processSymantec()");
 
-	boost::local_time::local_date_time ldt = pTZCalc->createLocalTime(boost_lexical_cast_wrapper<string>(uiYear) + " " + string(*pstrData, 0, 19), "%Y %b %d %H:%M:%S%F") + boost::posix_time::seconds(uiSkew);
-	int32_t timeVal = getUnix32FromLocalTime(ldt);
+	int32_t timeVal = 0;
+	boost::local_time::local_date_time ldt(boost::local_time::not_a_date_time);
+	if (pTZCalc->createLocalTime(boost_lexical_cast_wrapper<string>(uiYear) + " " + string(*pstrData, 0, 19), "%Y %b %d %H:%M:%S%F", &ldt)) {
+		timeVal = getUnix32FromLocalTime(ldt + boost::posix_time::seconds(uiSkew));
+	} else {
+		ERROR("processSymantec() Unable to createLocalTime()");
+	}
 	
 	string strMsgType = findSubString(*pstrData, 23, "", ": ");
 	string strMsg = findSubString(*pstrData, 23, ": ", "");

@@ -65,8 +65,12 @@ void processCustomVPN_S1(string* pstrData, u_int32_t uiSkew, bool bNormalize, ti
 					(0 <= uiHour && uiHour <= 23) &&
 					(0 <= uiMin && uiMin <= 60) &&
 					(0 <= uiSec && uiSec <= 60)) {
-					  boost::local_time::local_date_time ldt = pTZCalc->createLocalTime(uiMonth, uiDay, uiYear, uiHour, uiMin, uiSec) + boost::posix_time::seconds(uiSkew);
-				timeVal = getUnix32FromLocalTime(ldt);
+					  boost::local_time::local_date_time ldt(boost::local_time::not_a_date_time);
+					  if (pTZCalc->createLocalTime(uiMonth, uiDay, uiYear, uiHour, uiMin, uiSec, &ldt)) {
+							timeVal = getUnix32FromLocalTime(ldt + boost::posix_time::seconds(uiSkew));
+					  } else {
+							ERROR("processCustomVPN_S1() Unable to createLocalTime()");
+					  }
 			} else {
 					  DEBUG("whoops");
 				//ERROR
@@ -112,14 +116,18 @@ void processCustomFSEM(string* pstrData, u_int32_t uiSkew, bool bNormalize, time
 				uiHour = 0;
 			}
 		}
-		boost::local_time::local_date_time ldt = pTZCalc->createLocalTime(	boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(0)),	//month
-							 															boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(1)),	//day
-																						boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(2)),	//year
-																						uiHour, 																			//hour
-																						boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(1)),	//minute
-																						boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(2)))	//second
-																						+ boost::posix_time::seconds(uiSkew);
-		timeVal = getUnix32FromLocalTime(ldt);
+		boost::local_time::local_date_time ldt(boost::local_time::not_a_date_time);
+		if (pTZCalc->createLocalTime(	boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(0)),	//month
+							 				boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(1)),	//day
+											boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(2)),	//year
+											uiHour, 																			//hour
+											boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(1)),	//minute
+											boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(2)),
+											&ldt)) {	//second
+			timeVal = getUnix32FromLocalTime(ldt + boost::posix_time::seconds(uiSkew));
+		} else {
+			ERROR("processCustomFSEM() Unable to createLocalTime()");
+		}
 	}
 
 	string strIPPort = delimText.getField(1);
@@ -165,14 +173,18 @@ void processCustomFSBT(string* pstrData, u_int32_t uiSkew, bool bNormalize, time
 				uiHour = 0;
 			}
 		}
-		boost::local_time::local_date_time ldt = pTZCalc->createLocalTime(	boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(0)),	//month
+		boost::local_time::local_date_time ldt(boost::local_time::not_a_date_time);
+		if (pTZCalc->createLocalTime(	boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(0)),	//month
 							 															boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(1)),	//day
 																						boost_lexical_cast_wrapper<u_int16_t>(delimDate.getField(2)),	//year
 																						uiHour, 																			//hour
 																						boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(1)),	//minute
-																						boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(2)))	//second
-																						+ boost::posix_time::seconds(uiSkew);
-		timeVal = getUnix32FromLocalTime(ldt);
+																						boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(2)),
+																						&ldt)) {	//second
+			timeVal = getUnix32FromLocalTime(ldt + boost::posix_time::seconds(uiSkew));
+		} else {
+			ERROR("processCustomFSBT() Unable to createLocalTime()");
+		}
 	}
 
 	string strIPPort = delimText.getField(1);
