@@ -174,29 +174,39 @@ int main(int argc, const char** argv) {
 					strFields[MULTI2MAC_DETAIL] = "Unknown Type";
 				}
 
-				// Do some rudimentary cleanup on the data; since '|' is a field delimiter, it cannot be in the final output.
-				replace(strFields[MULTI2MAC_HASH].begin(), strFields[MULTI2MAC_HASH].end(), '|', '-');
-				replace(strFields[MULTI2MAC_DETAIL].begin(), strFields[MULTI2MAC_DETAIL].end(), '|', '-');
-				replace(strFields[MULTI2MAC_TYPE].begin(), strFields[MULTI2MAC_TYPE].end(), '|', '-');
-				replace(strFields[MULTI2MAC_LOG].begin(), strFields[MULTI2MAC_LOG].end(), '|', '-');
-				replace(strFields[MULTI2MAC_FROM].begin(), strFields[MULTI2MAC_FROM].end(), '|', '-');
-				replace(strFields[MULTI2MAC_TO].begin(), strFields[MULTI2MAC_TO].end(), '|', '-');
+				if (strFields[MULTI2MAC_DETAIL].length() > 0 ) {
+					// Do some rudimentary cleanup on the data; since '|' is a field delimiter, it cannot be in the final output.
+					replace(strFields[MULTI2MAC_HASH].begin(), strFields[MULTI2MAC_HASH].end(), '|', '-');
+					replace(strFields[MULTI2MAC_DETAIL].begin(), strFields[MULTI2MAC_DETAIL].end(), '|', '-');
+					replace(strFields[MULTI2MAC_TYPE].begin(), strFields[MULTI2MAC_TYPE].end(), '|', '-');
+					replace(strFields[MULTI2MAC_LOG].begin(), strFields[MULTI2MAC_LOG].end(), '|', '-');
+					replace(strFields[MULTI2MAC_FROM].begin(), strFields[MULTI2MAC_FROM].end(), '|', '-');
+					replace(strFields[MULTI2MAC_TO].begin(), strFields[MULTI2MAC_TO].end(), '|', '-');
 	
-				// Output final mactime format
-				cout 					<< strFields[MULTI2MAC_HASH]		<< "|"
-										<< strFields[MULTI2MAC_DETAIL]	<< "|"
-										<< strFields[MULTI2MAC_TYPE]		<< "|"
-										<< strFields[MULTI2MAC_LOG]		<< "|"
-										<< strFields[MULTI2MAC_FROM]		<< "|"
-										<< strFields[MULTI2MAC_TO]			<< "|"
-										<< strFields[MULTI2MAC_SIZE]		<< "|"
-										<< strFields[MULTI2MAC_ATIME]		<< "|"
-										<< strFields[MULTI2MAC_MTIME]		<< "|"
-										<< strFields[MULTI2MAC_CTIME]		<< "|"
-										<< strFields[MULTI2MAC_BTIME]		<< "\n";
+					// Output final mactime format
+					cout 					<< strFields[MULTI2MAC_HASH]		<< "|"
+											<< strFields[MULTI2MAC_DETAIL]	<< "|"
+											<< strFields[MULTI2MAC_TYPE]		<< "|"
+											<< strFields[MULTI2MAC_LOG]		<< "|"
+											<< strFields[MULTI2MAC_FROM]		<< "|"
+											<< strFields[MULTI2MAC_TO]			<< "|"
+											<< strFields[MULTI2MAC_SIZE]		<< "|"
+											<< strFields[MULTI2MAC_ATIME]		<< "|"
+											<< strFields[MULTI2MAC_MTIME]		<< "|"
+											<< strFields[MULTI2MAC_CTIME]		<< "|"
+											<< strFields[MULTI2MAC_BTIME]		<< "\n";
+				} // if (strFields[MULTI2MAC_DETAIL].length() > 0 ) {
 	
 				// If secondary records created, output them in mactime format also
-				if (strSecondary[MULTI2MAC_DETAIL] != "") {
+				if (strSecondary[MULTI2MAC_DETAIL].length() > 0) {
+					// Do some rudimentary cleanup on the data; since '|' is a field delimiter, it cannot be in the final output.
+					replace(strSecondary[MULTI2MAC_HASH].begin(), strSecondary[MULTI2MAC_HASH].end(), '|', '-');
+					replace(strSecondary[MULTI2MAC_DETAIL].begin(), strSecondary[MULTI2MAC_DETAIL].end(), '|', '-');
+					replace(strSecondary[MULTI2MAC_TYPE].begin(), strSecondary[MULTI2MAC_TYPE].end(), '|', '-');
+					replace(strSecondary[MULTI2MAC_LOG].begin(), strSecondary[MULTI2MAC_LOG].end(), '|', '-');
+					replace(strSecondary[MULTI2MAC_FROM].begin(), strSecondary[MULTI2MAC_FROM].end(), '|', '-');
+					replace(strSecondary[MULTI2MAC_TO].begin(), strSecondary[MULTI2MAC_TO].end(), '|', '-');
+	
 					cout 				<< strSecondary[MULTI2MAC_HASH]		<< "|"
 										<< strSecondary[MULTI2MAC_DETAIL]	<< "|"
 										<< strSecondary[MULTI2MAC_TYPE]		<< "|"
@@ -208,7 +218,7 @@ int main(int argc, const char** argv) {
 										<< strSecondary[MULTI2MAC_MTIME]		<< "|"
 										<< strSecondary[MULTI2MAC_CTIME]		<< "|"
 										<< strSecondary[MULTI2MAC_BTIME]		<< "\n";
-				} // if (strSecondary[MULTI2MAC_DETAIL] != "") {
+				} // if (strSecondary[MULTI2MAC_DETAIL].length() > 0) {
 
 				// Clear out values for the next line
 				for (int i=0; i<11; i++) {
