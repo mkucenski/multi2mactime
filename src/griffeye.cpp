@@ -46,6 +46,7 @@ void processGriffeyeCSV(string* pstrData, string* pstrHeader, u_int32_t uiSkew, 
 	if (bTimeVal > 0 || aTimeVal > 0 || mTimeVal > 0) {
 		//Output Values
 		strFields[MULTI2MAC_HASH]		= delimText.getValue(delimHeader.getColumnByValue("MD5"));
+		// TODO How to handle slashes in file listings--when trying to correlate/compare between MCT records from different sources (e.g. Griffeye to TSK), you have to compensate...
 		strFields[MULTI2MAC_DETAIL]	= stripQualifiers(delimText.getValue(delimHeader.getColumnByValue("Directory Path")), '"') + "\\" + stripQualifiers(delimText.getValue(delimHeader.getColumnByValue("File Name")), '"');
 		strFields[MULTI2MAC_TYPE]		= string("cat") + delimText.getValue(delimHeader.getColumnByValue("Category"));
 		strFields[MULTI2MAC_LOG]		= "griffeye";
