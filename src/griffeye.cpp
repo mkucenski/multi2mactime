@@ -36,14 +36,16 @@ void processGriffeyeCSV(string* pstrData, string* pstrHeader, u_int32_t uiSkew, 
 	string strBirthed = delimText.getValue(delimHeader.getColumnByValue("Created Date"));
 	string strAccessed = delimText.getValue(delimHeader.getColumnByValue("Last Accessed"));
 	string strModified = delimText.getValue(delimHeader.getColumnByValue("Last Write Time"));
-	DEBUG("processGriffeyeCSV() (B) " << strBirthed << "; (A) " << strAccessed << "; (M) " << strModified);
+	string strCreated = delimText.getValue(delimHeader.getColumnByValue("Exif: CreateDate"));
+	DEBUG("processGriffeyeCSV() (B) " << strBirthed << "; (A) " << strAccessed << "; (M) " << strModified << "; (C) " << strCreated);
 
 	int32_t bTimeVal = getUnix32DateTimeFromString(strBirthed, ' ', '/', ':', uiSkew, pTZCalc);
 	int32_t aTimeVal = getUnix32DateTimeFromString(strAccessed, ' ', '/', ':', uiSkew, pTZCalc);
 	int32_t mTimeVal = getUnix32DateTimeFromString(strModified, ' ', '/', ':', uiSkew, pTZCalc);
+	int32_t cTimeVal = getUnix32DateTimeFromString(strCreated, ' ', '/', ':', uiSkew, pTZCalc);
 
 	// There needs to be at least one valid time value before anything else makes sense.
-	if (bTimeVal > 0 || aTimeVal > 0 || mTimeVal > 0) {
+	if (bTimeVal > 0 || aTimeVal > 0 || mTimeVal > 0 || cTimeVal > 0) {
 		//Output Values
 		strFields[MULTI2MAC_HASH]		= delimText.getValue(delimHeader.getColumnByValue("MD5"));
 		// TODO How to handle slashes in file listings--when trying to correlate/compare between MCT records from different sources (e.g. Griffeye to TSK), you have to compensate...
@@ -55,7 +57,7 @@ void processGriffeyeCSV(string* pstrData, string* pstrHeader, u_int32_t uiSkew, 
 		strFields[MULTI2MAC_SIZE]		= delimText.getValue(delimHeader.getColumnByValue("File Size"));
 		strFields[MULTI2MAC_ATIME]		= (aTimeVal > 0 ? boost_lexical_cast_wrapper<string>(aTimeVal) : "");
 		strFields[MULTI2MAC_MTIME]		= (mTimeVal > 0 ? boost_lexical_cast_wrapper<string>(mTimeVal) : "");
-		//strFields[MULTI2MAC_CTIME]	= 
+		strFields[MULTI2MAC_CTIME]		= (cTimeVal > 0 ? boost_lexical_cast_wrapper<string>(cTimeVal) : "");
 		strFields[MULTI2MAC_BTIME]		= (bTimeVal > 0 ? boost_lexical_cast_wrapper<string>(bTimeVal) : "");
 	} else {
 		WARNING("processGriffeyeCSV() No valid time values found (" << *pstrData << ")");
