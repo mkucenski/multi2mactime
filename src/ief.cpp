@@ -79,6 +79,7 @@ int32_t getIEFTime(string strTime, u_int32_t idArtifact, u_int32_t uiSkew, timeZ
 
 bool getIEFFields(delimTextRow* p_delimText, delimTextRow* p_delimHeader, u_int32_t idArtifact, u_int32_t uiSkew, timeZoneCalculator* pTZCalc, string* strFields) {
 	bool rv = false;
+	DEBUG("getIEFFields(): Start...");
 
 	if (p_delimText != NULL && p_delimHeader != NULL && pTZCalc != NULL && strFields != NULL) {
 		int iBTimeColumn = p_delimHeader->getColumnByValue(getMessage(idArtifact + IEF_BTIME, IEF_ARTIFACT_FIELDS, sizeof(IEF_ARTIFACT_FIELDS)));
@@ -91,7 +92,7 @@ bool getIEFFields(delimTextRow* p_delimText, delimTextRow* p_delimHeader, u_int3
 		string strMTime = p_delimText->getValue(iMTimeColumn);
 		string strCTime = p_delimText->getValue(iCTimeColumn);
 
-		DEBUG("getIEFFields(): " << 	(idArtifact & IEF_PRIMARY_MASK == IEF_PRIMARY ? "PRIMARY: " : (idArtifact & IEF_PRIMARY_MASK == IEF_SECONDARY ? "SECONDARY: " : "TERTIARY: ")) <<	
+		DEBUG("getIEFFields(): " << 	((idArtifact & IEF_PRIMARY_MASK) == IEF_PRIMARY ? "PRIMARY: " : ((idArtifact & IEF_PRIMARY_MASK) == IEF_SECONDARY ? "SECONDARY: " : "TERTIARY: ")) <<	
 							 					"strBTime(" << strBTime << ")(" << iBTimeColumn << ") " <<
 							 					"strATime(" << strATime << ")(" << iATimeColumn << ") " <<
 												"strMTime(" << strMTime << ")(" << iMTimeColumn << ") " <<
@@ -104,9 +105,13 @@ bool getIEFFields(delimTextRow* p_delimText, delimTextRow* p_delimHeader, u_int3
 		
 		string strDetails = stripQualifiers(p_delimText->getValue(p_delimHeader->getColumnByValue(getMessage(idArtifact + IEF_DETAIL, IEF_ARTIFACT_FIELDS, sizeof(IEF_ARTIFACT_FIELDS)))), '"');
 		string strDetail2 = stripQualifiers(p_delimText->getValue(p_delimHeader->getColumnByValue(getMessage(idArtifact + IEF_DETAIL2, IEF_ARTIFACT_FIELDS, sizeof(IEF_ARTIFACT_FIELDS)))), '"');
-		strDetails += (strDetail2 != "" ? " (" + strDetail2 + ")" : "");
+		strDetails += (strDetail2 != "" ? " [" + strDetail2 + "]" : "");
 		string strDetail3 = stripQualifiers(p_delimText->getValue(p_delimHeader->getColumnByValue(getMessage(idArtifact + IEF_DETAIL3, IEF_ARTIFACT_FIELDS, sizeof(IEF_ARTIFACT_FIELDS)))), '"');
-		strDetails += (strDetail3 != "" ? " (" + strDetail3 + ")" : "");
+		strDetails += (strDetail3 != "" ? " [" + strDetail3 + "]" : "");
+		string strDetail4 = stripQualifiers(p_delimText->getValue(p_delimHeader->getColumnByValue(getMessage(idArtifact + IEF_DETAIL4, IEF_ARTIFACT_FIELDS, sizeof(IEF_ARTIFACT_FIELDS)))), '"');
+		strDetails += (strDetail4 != "" ? " [" + strDetail4 + "]" : "");
+
+		DEBUG("getIEFFields(): strDetails(" << strDetails << ")");
 	
 		//Output Values
 		strFields[MULTI2MAC_HASH]		= p_delimText->getValue(p_delimHeader->getColumnByValue(getMessage(idArtifact + IEF_HASH, IEF_ARTIFACT_FIELDS, sizeof(IEF_ARTIFACT_FIELDS))));
@@ -126,5 +131,6 @@ bool getIEFFields(delimTextRow* p_delimText, delimTextRow* p_delimHeader, u_int3
 		ERROR("getIEFFields(): Invalid pointer");
 	}
 
+	DEBUG("getIEFFields(): Exit");
 	return rv;
 }
