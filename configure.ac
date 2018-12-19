@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT(multi2mactime, 20181023)
+AC_INIT(multi2mactime, 20181219)
 AC_CONFIG_SRCDIR([src/multi2mactime.cpp])
 AM_INIT_AUTOMAKE
 
