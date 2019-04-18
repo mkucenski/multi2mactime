@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// #define _DEBUG_
+//#define _DEBUG_
 #include "misc/debugMsgs.h"
 #include "misc/errMsgs.h"
 
@@ -66,13 +66,20 @@ int32_t getUnix32DateTimeFromString(string strDateTime, char chSeparator, char c
 		delimTextRow delimDate(delimDateTime.getField(0), chDateDelim);
 		delimTextRow delimTime(delimDateTime.getField(1), chTimeDelim);
 
-		u_int16_t uiHour = boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(0));
-		if (delimDateTime.getField(2) == "PM") {
-			uiHour = (uiHour != 12 ? uiHour + 12 : uiHour);
-		} else {
-			uiHour = (uiHour == 12 ? 0 : uiHour);
+		u_int16_t uiHour = 0;
+		string strMinute = "0";
+		string strSecond = "0";
+		if (delimTime.getDataLength() > 0) {
+			uiHour = boost_lexical_cast_wrapper<u_int16_t>(delimTime.getField(0));
+			if (delimDateTime.getField(2) == "PM") {
+				uiHour = (uiHour != 12 ? uiHour + 12 : uiHour);
+			} else {
+				uiHour = (uiHour == 12 ? 0 : uiHour);
+			}
+			strMinute = delimTime.getField(1);
+			strSecond = delimTime.getField(2);
 		}
-		rv = getUnix32FromStrings(delimDate.getField(0), delimDate.getField(1), delimDate.getField(2), to_string(uiHour), delimTime.getField(1), delimTime.getField(2), uiSkew, pTZCalc);
+		rv = getUnix32FromStrings(delimDate.getField(0), delimDate.getField(1), delimDate.getField(2), to_string(uiHour), strMinute, strSecond, uiSkew, pTZCalc);
 	}
 
 	return rv;

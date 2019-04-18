@@ -133,7 +133,7 @@ int main(int argc, const char** argv) {
 
 			// For these types, we know there is a leading header row and we use that row to figure out what should be read.
 			string strHeader;
-			if (strType == "griffeye" || strType == "ief") {
+			if (strType == "griffeye" || strType == "ief" || strType == "notes" || strType == "exiftool") {
 				strHeader = txtFileObj.getNextRow();
 				DEBUG("strHeader: " << strHeader);
 			}	  
@@ -169,6 +169,10 @@ int main(int argc, const char** argv) {
 					processGriffeyeCSV(&strData, &strHeader, uiSkew, bNormalize, &tzcalc, strFields);
 				} else if (strType == "ief") {
 					processIEF(&strData, &strHeader, &*it, uiSkew, bNormalize, &tzcalc, strFields, strSecondary);
+				} else if (strType == "notes") {
+					processNotes(&strData, &strHeader, uiSkew, bNormalize, &tzcalc, strFields);
+				} else if (strType == "exiftool") {
+					processExifTool(&strData, &strHeader, uiSkew, bNormalize, &tzcalc, strFields, strSecondary);
 				} else {
 					strFields[MULTI2MAC_LOG] = "-----unknown";
 					strFields[MULTI2MAC_DETAIL] = "Unknown Type";

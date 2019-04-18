@@ -44,8 +44,9 @@ using namespace std;
 #define MULTI2MAC_CTIME		TSK3_MACTIME_CTIME
 #define MULTI2MAC_BTIME		TSK3_MACTIME_CRTIME
 
+void processExifTool(string* pstrData, string* pstrHeader, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields, string* strSecondary);
+void processNotes(string* pstrData, string* pstrHeader, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields);
 void processIEF(string* pstrData, string* pstrHeader, string* pstrFilename, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields, string* strSecondary);
-
 void processGriffeyeCSV(string* pstrData, string* pstrHeader, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields);
 void processHirsch(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields);
 void processFortiGate1K5(string* pstrData, u_int32_t uiSkew, bool bNormalize, timeZoneCalculator* pTZCalc, string* strFields);
